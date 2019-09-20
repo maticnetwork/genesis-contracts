@@ -20,7 +20,7 @@ contract BorValidatorSet is ValidatorSet {
   uint256 public constant FIRST_END_BLOCK = 255;
   
   // sprint
-  uint256 public sprint = 64;
+  uint256 public sprint;
   
   struct Validator {
       uint256 id;
@@ -47,6 +47,8 @@ contract BorValidatorSet is ValidatorSet {
   constructor() public {}
   
   function setInitialValidators() internal {
+    sprint = 64;
+
     address[] memory d;
     uint256[] memory p;
 
