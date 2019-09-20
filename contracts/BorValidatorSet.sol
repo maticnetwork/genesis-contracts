@@ -17,6 +17,7 @@ contract BorValidatorSet is ValidatorSet {
   bytes32 public constant ROUND_TYPE = keccak256("vote");
   bytes32 public constant BOR_ID = keccak256("15001");
   uint8 public constant VOTE_TYPE = 2;
+  uint256 public constant FIRST_END_BLOCK = 255;
   
   // sprint
   uint256 public sprint = 64;
@@ -46,9 +47,6 @@ contract BorValidatorSet is ValidatorSet {
   constructor() public {}
   
   function setInitialValidators() internal {
-    // fix sprint initially
-    sprint = 64;
-
     address[] memory d;
     uint256[] memory p;
 
@@ -60,7 +58,7 @@ contract BorValidatorSet is ValidatorSet {
     spans[span] = Span({
       number: span,
       startBlock: 0,
-      endBlock: 255
+      endBlock: FIRST_END_BLOCK
     });
     spanNumbers.push(span);
     validators[span].length = 0;
