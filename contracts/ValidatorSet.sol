@@ -48,4 +48,14 @@ interface ValidatorSet {
 		external 
 		view 
 		returns (uint256);
+
+  function getSpanByBlock(uint256 number) 
+		external 
+		view 
+		returns (uint256);
+
+  function getBorValidators(uint256 number) 
+		external 
+		view
+		returns (address[] memory, uint256[] memory);
 }

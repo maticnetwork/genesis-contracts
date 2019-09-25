@@ -110,11 +110,12 @@ contract BorValidatorSet is ValidatorSet {
   function getProducersBySpan(uint256 span) internal view returns (Validator[] memory) {
     return producers[span];
   }
-  
-  function currentSpanNumber() public view returns (uint256) {
+
+  // get span number by block
+  function getSpanByBlock(uint256 number) public view returns (uint256) {
     for (uint256 i = spanNumbers.length; i > 0; i--) {
       Span memory span = spans[spanNumbers[i - 1]];
-      if (span.startBlock <= block.number && span.endBlock != 0 && block.number <= span.endBlock) {
+      if (span.startBlock <= number && span.endBlock != 0 && number <= span.endBlock) {
         return span.number;
       }
     }
@@ -126,6 +127,10 @@ contract BorValidatorSet is ValidatorSet {
 
     // return default if not found any thing
     return 0;
+  }
+  
+  function currentSpanNumber() public view returns (uint256) {
+    return getSpanByBlock(block.number);
   }
   
   function getValidatorsTotalStakeBySpan(uint256 span) public view returns (uint256) {
@@ -176,6 +181,25 @@ contract BorValidatorSet is ValidatorSet {
     return false;
   }
 
+  // get bor validator
+  function getBorValidators(uint256 number) public view returns (address[] memory, uint256[] memory) {
+    if (number <= FIRST_END_BLOCK) {
+      return getInitialValidators();
+    }
+
+    // span number by block
+    uint256 span = getSpanByBlock(number);
+
+    address[] memory addrs = new address[](producers[span].length);
+    uint256[] memory powers = new uint256[](producers[span].length);
+    for (uint256 i = 0; i < producers[span].length; i++) {
+      addrs[i] = producers[span][i].signer;
+      powers[i] = producers[span][i].power;
+    }
+
+    return (addrs, powers);
+  }
+
   /// Get current validator set (last enacted or initial if no changes ever made) with current stake.
   function getInitialValidators() public view returns (address[] memory, uint256[] memory) {
     address[] memory addrs = new address[](1);
@@ -194,16 +218,7 @@ contract BorValidatorSet is ValidatorSet {
 
   /// Get current validator set (last enacted or initial if no changes ever made) with current stake.
   function getValidators() public view returns (address[] memory, uint256[] memory) {
-    uint256 span = currentSpanNumber();
-
-    address[] memory addrs = new address[](producers[span].length);
-    uint256[] memory powers = new uint256[](producers[span].length);
-    for (uint256 i = 0; i < producers[span].length; i++) {
-      addrs[i] = producers[span][i].signer;
-      powers[i] = producers[span][i].power;
-    }
-
-    return (addrs, powers);
+    return getBorValidators(block.number);
   }
 
   // send transaction
