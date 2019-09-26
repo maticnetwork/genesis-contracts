@@ -17,7 +17,7 @@ contract BorValidatorSet is ValidatorSet {
   bytes32 public constant ROUND_TYPE = keccak256("vote");
   bytes32 public constant BOR_ID = keccak256("15001");
   uint8 public constant VOTE_TYPE = 2;
-  uint256 public constant FIRST_END_BLOCK = 255;
+  uint256 public constant FIRST_END_BLOCK = 6399;
   
   // sprint
   uint256 public sprint;
