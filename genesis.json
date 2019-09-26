@@ -9,8 +9,8 @@
     "byzantiumBlock": 0,
     "constantinopleBlock": 0,
     "bor": {
-      "period": 1,
-      "producerDelay": 5,
+      "period": 4,
+      "producerDelay": 4,
       "sprint": 64,
       "validatorContract": "0x0000000000000000000000000000000000001000"
     }
