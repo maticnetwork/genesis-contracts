@@ -336,8 +336,6 @@ contract BorValidatorSet is ValidatorSet {
       if (isValidator(span, signer) && signer > lastAdd) {
         lastAdd = signer;
         stakePower = stakePower.add(validator.power);
-      } else {
-        continue;
       }
     }
     
