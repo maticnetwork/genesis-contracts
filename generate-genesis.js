@@ -62,6 +62,11 @@ Promise.all([
     "borStateReceiverContract",
     "contracts/StateReceiver.sol",
     "StateReceiver"
+  ),
+  compileContract(
+    "maticChildERC20Contract",
+    "contracts/MaticChildERC20.sol",
+    "MaticChildERC20"
   )
 ]).then(result => {
   const data = {
