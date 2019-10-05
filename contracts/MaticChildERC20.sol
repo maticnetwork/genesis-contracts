@@ -41,6 +41,17 @@ contract MaticChildERC20 {
     uint256 output2
   );
 
+  event LogFeeTransfer(
+    address indexed token,
+    address indexed from,
+    address indexed to,
+    uint256 amount,
+    uint256 input1,
+    uint256 input2,
+    uint256 output1,
+    uint256 output2
+  );
+
   address public token; // set token
 
   constructor() public {}
