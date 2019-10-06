@@ -1,7 +1,11 @@
 pragma solidity 0.5.9;
 pragma experimental ABIEncoderV2;
 
+import { SafeMath } from "./SafeMath.sol";
+
 contract MaticChildERC20 {
+  using SafeMath for uint256;
+
   event Transfer(
     address indexed from, 
     address indexed to, 
@@ -52,8 +56,16 @@ contract MaticChildERC20 {
     uint256 output2
   );
 
-  address public token; // set token
+  // decimals
+  uint256 private decimals = 10**18;
 
+  // default token
+  address public constant token = 0x0000000000000000000000000000000000001010; // set token
+
+  // current supply
+  uint256 public currentSupply = 0;
+
+  // contructor
   constructor() public {}
 
   function deposit(address payable user, uint256 amount) public { // onlyOwner // {
@@ -68,6 +80,12 @@ contract MaticChildERC20 {
 
     // deposit events
     emit Deposit(token, user, amount, input1, balanceOf(user));
+
+    // update current supply
+    currentSupply = currentSupply.add(amount);
+
+    // keep current supply <= total supply
+    require(currentSupply <= totalSupply());
   }
 
   function withdraw(uint256 amount) payable public {
@@ -80,17 +98,13 @@ contract MaticChildERC20 {
 
     // withdraw event
     emit Withdraw(token, user, amount, input, balanceOf(user));
+
+    // update current supply
+    currentSupply = currentSupply.sub(amount);
   }
 
   function transfer(address payable recipient, uint256 amount) payable public returns (bool) {
-    if (msg.value != amount) {
-      return false;
-    }
-
-    // transfer amount to recipient
-    recipient.transfer(amount);
-    emit Transfer(address(this), recipient, amount);
-    return true;
+    return transferFrom(msg.sender, recipient, amount);
   }
 
   function allowance(address, address) public view returns (uint256) {
@@ -101,12 +115,19 @@ contract MaticChildERC20 {
     return false;
   }
 
-  function transferFrom(address, address, uint256) public returns (bool) {
-    return false;
+  function transferFrom(address from, address payable to, uint256 amount) payable public returns (bool) {
+    if (msg.value != amount) {
+      return false;
+    }
+
+    // transfer amount to to
+    to.transfer(amount);
+    emit Transfer(from, to, amount);
+    return true;
   }
 
   function totalSupply() public view returns (uint256) {
-    return 0;
+    return 10000000000 * decimals;
   }
 
   function balanceOf(address account) public view returns (uint256) {
