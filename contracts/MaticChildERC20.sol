@@ -60,7 +60,7 @@ contract MaticChildERC20 {
   uint256 private decimals = 10**18;
 
   // default token
-  address public constant token = 0x0000000000000000000000000000000000001010; // set token
+  address public constant TOKEN = 0x0000000000000000000000000000000000001010; // set token
 
   // current supply
   uint256 public currentSupply = 0;
@@ -79,7 +79,7 @@ contract MaticChildERC20 {
     user.transfer(amount);
 
     // deposit events
-    emit Deposit(token, user, amount, input1, balanceOf(user));
+    emit Deposit(TOKEN, user, amount, input1, balanceOf(user));
   }
 
   function withdraw(uint256 amount) payable public {
@@ -91,7 +91,7 @@ contract MaticChildERC20 {
     require(amount > 0 && input >= amount && msg.value == amount);
 
     // withdraw event
-    emit Withdraw(token, user, amount, input, balanceOf(user));
+    emit Withdraw(TOKEN, user, amount, input, balanceOf(user));
   }
 
   function transfer(address payable recipient, uint256 amount) payable public returns (bool) {
