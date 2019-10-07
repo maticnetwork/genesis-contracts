@@ -80,12 +80,6 @@ contract MaticChildERC20 {
 
     // deposit events
     emit Deposit(token, user, amount, input1, balanceOf(user));
-
-    // update current supply
-    currentSupply = currentSupply.add(amount);
-
-    // keep current supply <= total supply
-    require(currentSupply <= totalSupply());
   }
 
   function withdraw(uint256 amount) payable public {
@@ -98,9 +92,6 @@ contract MaticChildERC20 {
 
     // withdraw event
     emit Withdraw(token, user, amount, input, balanceOf(user));
-
-    // update current supply
-    currentSupply = currentSupply.sub(amount);
   }
 
   function transfer(address payable recipient, uint256 amount) payable public returns (bool) {
