@@ -1,49 +1,10 @@
 pragma solidity ^0.5.11;
 pragma experimental ABIEncoderV2;
 
-import { SafeMath } from "./SafeMath.sol";
+import { ChildERC20 } from "./ChildChain.sol";
 
-contract MaticChildERC20 {
-  using SafeMath for uint256;
 
-  event Transfer(
-    address indexed from, 
-    address indexed to, 
-    uint256 value
-  );
-
-  event Approval(
-    address indexed owner, 
-    address indexed spender, 
-    uint256 value
-  );
-
-  event Deposit(
-    address indexed token,
-    address indexed from,
-    uint256 amount,
-    uint256 input1,
-    uint256 output1
-  );
-
-  event Withdraw(
-    address indexed token,
-    address indexed from,
-    uint256 amount,
-    uint256 input1,
-    uint256 output1
-  );
-
-  event LogTransfer(
-    address indexed token,
-    address indexed from,
-    address indexed to,
-    uint256 amount,
-    uint256 input1,
-    uint256 input2,
-    uint256 output1,
-    uint256 output2
-  );
+contract MaticChildERC20 is ChildERC20 {
 
   event LogFeeTransfer(
     address indexed token,
@@ -56,19 +17,14 @@ contract MaticChildERC20 {
     uint256 output2
   );
 
-  // decimals
-  uint256 private decimals = 10**18;
-
-  // default token
   address public constant TOKEN = 0x0000000000000000000000000000000000001010; // set token
 
-  // current supply
   uint256 public currentSupply = 0;
+  uint256 private decimals = 10**18;
 
-  // contructor
   constructor() public {}
 
-  function deposit(address payable user, uint256 amount) public { // onlyOwner // {
+  function deposit(address payable user, uint256 amount) public onlyOwner {
     // check for amount and user
     require(amount > 0 && user != address(0x0));
 
@@ -94,19 +50,7 @@ contract MaticChildERC20 {
     emit Withdraw(TOKEN, user, amount, input, balanceOf(user));
   }
 
-  function transfer(address payable recipient, uint256 amount) payable public returns (bool) {
-    return transferFrom(msg.sender, recipient, amount);
-  }
-
-  function allowance(address, address) public view returns (uint256) {
-    return 0;
-  }
-
-  function approve(address, uint256) public returns (bool) {
-    return false;
-  }
-
-  function transferFrom(address from, address payable to, uint256 amount) payable public returns (bool) {
+  function _transferFrom(address from, address payable to, uint256 amount) payable internal returns (bool) {
     if (msg.value != amount) {
       return false;
     }
