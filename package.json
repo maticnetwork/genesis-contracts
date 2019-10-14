@@ -6,6 +6,7 @@
   "scripts": {
     "testrpc": "ganache-cli --mnemonic 'clock radar mass judge dismiss just intact mind resemble fringe diary casino' --gasLimit 13000000",
     "truffle": "truffle",
+    "flatten:ChildChain": "truffle-flattener contracts/childChain/ChildChain.sol > contracts/ChildChain.sol",
     "truffle:test": "truffle test",
     "truffle:compile": "truffle compile",
     "truffle:migrate": "truffle migrate",
@@ -20,6 +21,7 @@
   "dependencies": {
     "commander": "^3.0.1",
     "truffle": "^5.0.34",
-    "openzeppelin-solidity": "2.2.0"
+    "openzeppelin-solidity": "2.2.0",
+    "truffle-flattener": "1.4.2"
   }
 }

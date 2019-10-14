@@ -45,7 +45,6 @@ function compileContract(key, contractFile, contractName) {
       `======= ${contractFile}:${contractName} =======\nBinary of the runtime part: `,
       "@@@@"
     )
-
     const matched = compiledData.match(/@@@@\n([a-f0-9]+)/)
     return { key, compiledData: matched[1], contractName, contractFile }
   })
@@ -67,6 +66,11 @@ Promise.all([
     "maticChildERC20Contract",
     "contracts/MaticChildERC20.sol",
     "MaticChildERC20"
+  ),
+  compileContract(
+    "ChildChainContract",
+    "contracts/ChildChain.sol",
+    "ChildChain"
   )
 ]).then(result => {
   const data = {
