@@ -49,6 +49,18 @@ contract ChildERC20 is ChildToken, ERC20, LibTokenTransferOrder, ERC20Detailed {
     parent = _parent;
   }
 
+  function allowance(address, address) public view returns (uint256) {
+    revert("disabled feature");
+  }
+
+  function approve(address, uint256) public returns (bool) {
+    revert("disabled feature");
+  }
+
+  function transferFrom(address from, address to, uint256 value) external returns (bool){
+    revert("disabled feature");
+  }
+
   /**
    * Deposit tokens
    *

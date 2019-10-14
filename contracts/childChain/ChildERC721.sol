@@ -42,6 +42,22 @@ contract ChildERC721 is ChildToken, LibTokenTransferOrder, ERC721Full {
     parent = _parent;
   }
 
+  function approve(address to, uint256 tokenId) public {
+    revert("disabled feature");
+  }
+
+  function getApproved(uint256 tokenId) public view returns (address operator) {
+    revert("disabled feature");
+  }
+
+  function setApprovalForAll(address operator, bool _approved) public {
+    revert("disabled feature");
+  }
+
+  function isApprovedForAll(address owner, address operator) public view returns (bool){
+    revert("disabled feature");
+  }
+
   /**
    * @notice Deposit tokens
    * @param user address for deposit
