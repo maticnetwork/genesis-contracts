@@ -1,4 +1,4 @@
-pragma solidity ^0.5.2;
+pragma solidity ^0.5.11;
 //interface for parent contract of any child token
 
 
