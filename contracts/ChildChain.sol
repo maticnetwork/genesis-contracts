@@ -220,7 +220,7 @@ contract ChildToken is Ownable {
   }
 
   function deposit(address user, uint256 amountOrTokenId) public;
-  function withdraw(uint256 amountOrTokenId) public;
+  function withdraw(uint256 amountOrTokenId) public payable;
   function setParent(address _parent) public;
 
   function ecrecovery(
@@ -682,6 +682,18 @@ contract ChildERC20 is ChildToken, ERC20, LibTokenTransferOrder, ERC20Detailed {
     parent = _parent;
   }
 
+  function allowance(address, address) public view returns (uint256) {
+    revert("disabled feature");
+  }
+
+  function approve(address, uint256) public returns (bool) {
+    revert("disabled feature");
+  }
+
+  function transferFrom(address from, address to, uint256 value) public returns (bool){
+    revert("disabled feature");
+  }
+
   /**
    * Deposit tokens
    *
@@ -707,7 +719,7 @@ contract ChildERC20 is ChildToken, ERC20, LibTokenTransferOrder, ERC20Detailed {
    *
    * @param amount tokens
    */
-  function withdraw(uint256 amount) public {
+  function withdraw(uint256 amount) payable public {
     address user = msg.sender;
     // input balance
     uint256 input = balanceOf(user);
@@ -1633,6 +1645,22 @@ contract ChildERC721 is ChildToken, LibTokenTransferOrder, ERC721Full {
     parent = _parent;
   }
 
+  function approve(address to, uint256 tokenId) public {
+    revert("disabled feature");
+  }
+
+  function getApproved(uint256 tokenId) public view returns (address operator) {
+    revert("disabled feature");
+  }
+
+  function setApprovalForAll(address operator, bool _approved) public {
+    revert("disabled feature");
+  }
+
+  function isApprovedForAll(address owner, address operator) public view returns (bool){
+    revert("disabled feature");
+  }
+
   /**
    * @notice Deposit tokens
    * @param user address for deposit
@@ -1648,7 +1676,7 @@ contract ChildERC721 is ChildToken, LibTokenTransferOrder, ERC721Full {
    * @notice Withdraw tokens
    * @param tokenId tokenId of the token to be withdrawn
    */
-  function withdraw(uint256 tokenId) public {
+  function withdraw(uint256 tokenId) payable public {
     require(ownerOf(tokenId) == msg.sender);
     _burn(msg.sender, tokenId);
     emit Withdraw(token, msg.sender, tokenId);
