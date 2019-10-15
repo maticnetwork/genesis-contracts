@@ -32,21 +32,22 @@ contract ChildERC20 is ChildToken, ERC20, LibTokenTransferOrder {
     uint256 output2
   );
 
-  address public constant TOKEN = 0x0000000000000000000000000000000000001010; // set token
+  // mainnet Matic Token          0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0
+  address public constant TOKEN = 0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0;
 
   uint256 public currentSupply = 0;
   uint8 constant private _decimals = 18;
 
   constructor() public {}
 
-  function initConstructor (address _owner)
+  // can be called by anyone to set owner
+  function initConstructor ()
     public {
-    // TODO: require once
-    // require(_token != address(0x0) && _owner != address(0x0));
-    token = address(0x0);
+    // transfer Ownership to ChildChain @0x1002
+    _transferOwnership(address(0x0000000000000000000000000000000000001002));
   }
 
-  function setParent(address _parent) public {
+  function setParent(address /*_parent*/) public {
     revert("disabled feature");
   }
 
@@ -73,6 +74,8 @@ contract ChildERC20 is ChildToken, ERC20, LibTokenTransferOrder {
     address payable _user = address(uint160(user));
     _user.transfer(amount);
 
+    currentSupply = currentSupply.add(amount);
+
     // deposit events
     emit Deposit(TOKEN, user, amount, input1, balanceOf(user));
   }
@@ -82,6 +85,7 @@ contract ChildERC20 is ChildToken, ERC20, LibTokenTransferOrder {
     // input balance
     uint256 input = balanceOf(user);
 
+    currentSupply = currentSupply.sub(amount);
     // check for amount
     require(amount > 0 && input >= amount && msg.value == amount);
 
