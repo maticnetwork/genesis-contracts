@@ -57,7 +57,7 @@ contract ChildERC20 is ChildToken, ERC20, LibTokenTransferOrder, ERC20Detailed {
     revert("disabled feature");
   }
 
-  function transferFrom(address from, address to, uint256 value) external returns (bool){
+  function transferFrom(address from, address to, uint256 value) public returns (bool){
     revert("disabled feature");
   }
 
@@ -86,7 +86,7 @@ contract ChildERC20 is ChildToken, ERC20, LibTokenTransferOrder, ERC20Detailed {
    *
    * @param amount tokens
    */
-  function withdraw(uint256 amount) public {
+  function withdraw(uint256 amount) payable public {
     address user = msg.sender;
     // input balance
     uint256 input = balanceOf(user);
