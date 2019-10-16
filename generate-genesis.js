@@ -21,6 +21,7 @@ function compileContract(key, contractFile, contractName) {
   return new Promise((resolve, reject) => {
     const ls = spawn("solc", [
       "--bin-runtime",
+      "matic-protocol/=node_modules/matic-protocol",
       // "--optimize",
       // "--optimize-runs",
       // "200",
@@ -54,23 +55,18 @@ function compileContract(key, contractFile, contractName) {
 Promise.all([
   compileContract(
     "borValidatorSetContract",
-    "contracts/BorValidatorSet.sol",
+    "contracts/Contracts.sol",
     "BorValidatorSet"
   ),
   compileContract(
     "borStateReceiverContract",
-    "contracts/StateReceiver.sol",
+    "contracts/Contracts.sol",
     "StateReceiver"
   ),
   compileContract(
     "maticChildERC20Contract",
-    "contracts/MaticChildERC20.sol",
+    "contracts/Contracts.sol",
     "MaticChildERC20"
-  ),
-  compileContract(
-    "ChildChainContract",
-    "contracts/ChildChain.sol",
-    "ChildChain"
   )
 ]).then(result => {
   const data = {

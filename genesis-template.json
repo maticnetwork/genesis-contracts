@@ -31,10 +31,6 @@
       "balance": "0x0",
       "code": "0x${borStateReceiverContract}"
     },
-    "0000000000000000000000000000000000001002": {
-      "balance": "0x0",
-      "code": "0x${ChildChainContract}"
-    },
     "0000000000000000000000000000000000001010": {
       "balance": "0x204fce5e3e25026110000000",
       "code": "0x${maticChildERC20Contract}"
