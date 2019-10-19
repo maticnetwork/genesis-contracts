@@ -1,0 +1,3 @@
+[submodule "matic-contracts"]
+	path = matic-contracts
+	url = git@github.com:maticnetwork/contracts
