@@ -14,7 +14,6 @@ $ npm run truffle:compile
 ```
 $ npm install
 $ npm run truffle:compile
-$ npm run flatten:ChildChain
 $ node generate-genesis.js
 ```
 
