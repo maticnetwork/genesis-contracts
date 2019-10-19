@@ -1,9 +1,9 @@
-pragma solidity 0.5.9;
+pragma solidity ^0.5.11;
 
+import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import { RLPReader } from "solidity-rlp/contracts/RLPReader.sol";
 
 import { ValidatorVerifier } from "./ValidatorVerifier.sol";
-import { RLPReader } from "./RLPReader.sol";
-import { SafeMath } from "./SafeMath.sol";
 import { IStateReceiver } from "./IStateReceiver.sol";
 
 

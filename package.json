@@ -22,6 +22,7 @@
     "commander": "^3.0.1",
     "truffle": "^5.0.34",
     "openzeppelin-solidity": "2.2.0",
-    "truffle-flattener": "1.4.2"
+    "truffle-flattener": "1.4.2",
+    "solidity-rlp": "^2.0.0"
   }
 }
