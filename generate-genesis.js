@@ -21,7 +21,7 @@ function compileContract(key, contractFile, contractName) {
   return new Promise((resolve, reject) => {
     const ls = spawn("solc", [
       "--bin-runtime",
-      "matic-protocol/=node_modules/matic-protocol",
+      "openzeppelin-solidity/=node_modules/openzeppelin-solidity/ solidity-rlp/=node_modules/solidity-rlp/ /=/",
       // "--optimize",
       // "--optimize-runs",
       // "200",

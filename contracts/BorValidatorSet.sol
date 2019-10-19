@@ -2,8 +2,8 @@ pragma solidity ^0.5.11;
 pragma experimental ABIEncoderV2;
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
-
 import { RLPReader } from "solidity-rlp/contracts/RLPReader.sol";
+
 import { BytesLib } from "../matic-contracts/contracts/common/lib/BytesLib.sol";
 import { ECVerify } from "../matic-contracts/contracts/common/lib/ECVerify.sol";
 import { ValidatorSet } from "./ValidatorSet.sol";
