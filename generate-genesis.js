@@ -21,7 +21,9 @@ function compileContract(key, contractFile, contractName) {
   return new Promise((resolve, reject) => {
     const ls = spawn("solc", [
       "--bin-runtime",
-      "openzeppelin-solidity/=node_modules/openzeppelin-solidity/ solidity-rlp/=node_modules/solidity-rlp/ /=/",
+      "openzeppelin-solidity/=node_modules/openzeppelin-solidity/",
+      "solidity-rlp/=node_modules/solidity-rlp/",
+      "/=/",
       // "--optimize",
       // "--optimize-runs",
       // "200",
@@ -46,6 +48,7 @@ function compileContract(key, contractFile, contractName) {
       `======= ${contractFile}:${contractName} =======\nBinary of the runtime part: `,
       "@@@@"
     )
+
     const matched = compiledData.match(/@@@@\n([a-f0-9]+)/)
     return { key, compiledData: matched[1], contractName, contractFile }
   })
@@ -55,17 +58,17 @@ function compileContract(key, contractFile, contractName) {
 Promise.all([
   compileContract(
     "borValidatorSetContract",
-    "contracts/Contracts.sol",
+    "contracts/BorValidatorSet.sol",
     "BorValidatorSet"
   ),
   compileContract(
     "borStateReceiverContract",
-    "contracts/Contracts.sol",
+    "contracts/StateReceiver.sol",
     "StateReceiver"
   ),
   compileContract(
     "maticChildERC20Contract",
-    "contracts/Contracts.sol",
+    "matic-contracts/contracts/child/MaticChildERC20.sol",
     "MaticChildERC20"
   )
 ]).then(result => {
