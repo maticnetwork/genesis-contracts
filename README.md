@@ -4,16 +4,20 @@
 
 Setup genesis whenever contracts get changed
 
-```
+```bash
 $ npm install
 $ npm run truffle:compile
 ```
 
-#### Change contracts
+#### Generate genesis file
 
-```
+```bash
+$ git submodule init
+$ git submodule update
+$ cd matic-contracts
 $ npm install
-$ npm run truffle:compile
+
+# Generate genesis
 $ node generate-genesis.js
 ```
 
