@@ -19,6 +19,8 @@
   "license": "MIT",
   "dependencies": {
     "commander": "^3.0.1",
-    "truffle": "^5.0.34"
+    "truffle": "^5.0.34",
+    "openzeppelin-solidity": "2.2.0",
+    "solidity-rlp": "^2.0.0"
   }
 }

@@ -1,10 +1,11 @@
-pragma solidity 0.5.9;
+pragma solidity ^0.5.11;
 pragma experimental ABIEncoderV2;
 
-import { RLPReader } from "./RLPReader.sol";
-import { BytesLib } from "./BytesLib.sol";
-import { ECVerify } from "./ECVerify.sol";
-import { SafeMath } from "./SafeMath.sol";
+import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import { RLPReader } from "solidity-rlp/contracts/RLPReader.sol";
+
+import { BytesLib } from "../matic-contracts/contracts/common/lib/BytesLib.sol";
+import { ECVerify } from "../matic-contracts/contracts/common/lib/ECVerify.sol";
 import { ValidatorSet } from "./ValidatorSet.sol";
 
 contract BorValidatorSet is ValidatorSet {
@@ -12,7 +13,7 @@ contract BorValidatorSet is ValidatorSet {
   using RLPReader for bytes;
   using RLPReader for RLPReader.RLPItem;
   using ECVerify for bytes32;
-  
+
   bytes32 public constant CHAIN = keccak256("heimdall-P5rXwg");
   bytes32 public constant ROUND_TYPE = keccak256("vote");
   bytes32 public constant BOR_ID = keccak256("15001");
