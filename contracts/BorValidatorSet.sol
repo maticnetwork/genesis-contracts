@@ -19,9 +19,15 @@ contract BorValidatorSet is ValidatorSet {
   bytes32 public constant BOR_ID = keccak256("15001");
   uint8 public constant VOTE_TYPE = 2;
   uint256 public constant FIRST_END_BLOCK = 255;
+
+  // system address
+  address public constant SYSTEM_ADDRESS = 0xffffFFFfFFffffffffffffffFfFFFfffFFFfFFfE;
   
   // sprint
   uint256 public sprint;
+
+  // pending span proposal
+  bool private _isSpanProposalPending;
   
   struct Validator {
       uint256 id;
@@ -46,6 +52,17 @@ contract BorValidatorSet is ValidatorSet {
   event NewSpan(uint256 indexed id, uint256 indexed startBlock, uint256 indexed endBlock);
 
   constructor() public {}
+
+  modifier onlySystem() {
+    require(msg.sender == SYSTEM_ADDRESS);
+    _;
+  }
+
+  modifier onlyValidator() {
+    uint256 span = currentSpanNumber();
+    require(isValidator(span, msg.sender));
+    _;
+  }
   
   function setInitialValidators() internal {
     sprint = 64;
@@ -241,49 +258,44 @@ contract BorValidatorSet is ValidatorSet {
 
     // get span
     uint256 span = currentSpanNumber();
-     // set initial validators if current span is zero
-    if (span == 0) {
-      setInitialValidators();
-    }
 
     // check sigs
-    uint256 stakedPower = getStakePower(span, keccak256(vote), sigs);
+    uint256 stakedPower = getStakePowerBySigs(span, keccak256(vote), sigs);
     require(stakedPower >= getValidatorsTotalStakeBySpan(span).mul(2).div(3).add(1), "Not enought power to change the span");
   }
 
+  function proposeSpan() external onlyValidator {
+    require(_isSpanProposalPending == false);
+    _isSpanProposalPending = true;
+  }
+
+  // Pending span proposal
+	function spanProposalPending() 
+		public
+		view
+		returns (bool) {
+    return _isSpanProposalPending;
+  }
+
   function commitSpan(
-    bytes calldata vote,
-    bytes calldata sigs,
-    bytes calldata txBytes,
-    bytes calldata proof
-  ) external {
+    uint256 newSpan,
+    uint256 startBlock, 
+    uint256 endBlock,
+    bytes calldata validatorBytes,
+    bytes calldata producerBytes
+  ) external onlySystem {
     // current span
     uint256 span = currentSpanNumber();
-
-    // validate vadlidator set
-    validateValidatorSet(vote, sigs, txBytes, proof);
-
-    // check transaction data
-    RLPReader.RLPItem[] memory dataList = txBytes.toRlpItem().toList();
-
-    // dataList = [msg, signature, memo]
-    // msg = dataList[0]
-    dataList = dataList[0].toList();
-
-    // get spanId, startBlock, endBlock and validators
-    uint256 newSpan = dataList[0].toUint();
-    // address proposer = dataList[1].toAddress();
-    uint256 startBlock = dataList[2].toUint();
-    uint256 endBlock = dataList[3].toUint();
+    // set initial validators if current span is zero
+    if (span == 0) {
+      setInitialValidators();
+    }
 
     // check conditions
     require(newSpan == span.add(1), "Invalid span id");
     require(endBlock > startBlock, "End block must be greater than start block");
     require((endBlock - startBlock + 1) % sprint == 0, "Difference between start and end block must be in multiples of sprint");
     require(spans[span].startBlock <= startBlock, "Start block must be greater than current span");
-
-    // check bor id
-    require(keccak256(dataList[6].toBytes()) == BOR_ID, "Bor chain id is invalid");
 
     // check if already in the span
     require(spans[newSpan].number == 0, "Span already exists");
@@ -298,7 +310,8 @@ contract BorValidatorSet is ValidatorSet {
     validators[newSpan].length = 0;
     producers[newSpan].length = 0;
 
-    RLPReader.RLPItem[] memory validatorItems = dataList[4].toList();
+    // set validators
+    RLPReader.RLPItem[] memory validatorItems = validatorBytes.toRlpItem().toList();
     for (uint256 i = 0; i < validatorItems.length; i++) {
       RLPReader.RLPItem[] memory v = validatorItems[i].toList();
       validators[newSpan].length++;
@@ -309,7 +322,8 @@ contract BorValidatorSet is ValidatorSet {
       });
     }
 
-    RLPReader.RLPItem[] memory producerItems = dataList[5].toList();
+    // set producers
+    RLPReader.RLPItem[] memory producerItems = producerBytes.toRlpItem().toList();
     for (uint256 i = 0; i < producerItems.length; i++) {
       RLPReader.RLPItem[] memory v = producerItems[i].toList();
         producers[newSpan].length++;
@@ -320,11 +334,12 @@ contract BorValidatorSet is ValidatorSet {
         });
     }
 
-    // emit event for new span
-    emit NewSpan(newSpan, startBlock, endBlock);
+    // clear pending span proposal
+    _isSpanProposalPending = false;
   }
 
-  function getStakePower(uint256 span, bytes32 dataHash, bytes memory sigs) public view returns (uint256) {
+  // Get stake power by sigs and data hash
+  function getStakePowerBySigs(uint256 span, bytes32 dataHash, bytes memory sigs) public view returns (uint256) {
     uint256 stakePower = 0;
     address lastAdd = address(0x0); // cannot have address(0x0) as an owner
     
@@ -342,6 +357,10 @@ contract BorValidatorSet is ValidatorSet {
     
     return stakePower;
   }
+
+  //
+  // Utility functions
+  //
   
   function checkMembership(
     bytes32 rootHash,

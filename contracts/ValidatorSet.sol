@@ -1,61 +1,72 @@
 pragma solidity ^0.5.11;
 
 interface ValidatorSet {
-	/// Get initial validator set
+	// Get initial validator set
 	function getInitialValidators()
 		external
 		view
 		returns (address[] memory, uint256[] memory);
 
-	/// Get current validator set (last enacted or initial if no changes ever made) with current stake.
+	// Get current validator set (last enacted or initial if no changes ever made) with current stake.
 	function getValidators()
 		external
 		view
 		returns (address[] memory, uint256[] memory);
 
 	// validate transaction
-  function validateValidatorSet(
-    bytes calldata vote,
-    bytes calldata sigs,
-    bytes calldata txBytes,
-    bytes calldata proof
-  ) external;
-
-	// Commit span
-	function commitSpan(
+	function validateValidatorSet(
 		bytes calldata vote,
 		bytes calldata sigs,
 		bytes calldata txBytes,
 		bytes calldata proof
 	) external;
 
-	function getSpan(uint256 span) 
-		external 
-		view 
+	// Propose new span
+	function proposeSpan()
+		external;
+
+	// Pending span proposal
+	function spanProposalPending()
+		external
+		view
+		returns (bool);
+
+	// Commit span
+	function commitSpan(
+		uint256 newSpan,
+		uint256 startBlock,
+		uint256 endBlock,
+		bytes calldata validatorBytes,
+		bytes calldata producerBytes
+	) external;
+
+	function getSpan(uint256 span)
+		external
+		view
 		returns (uint256 number, uint256 startBlock, uint256 endBlock);
 
-  function getCurrentSpan() 
-		external 
-		view 
-		returns (uint256 number, uint256 startBlock, uint256 endBlock);	
-	
-	function getNextSpan() 
-		external 
+	function getCurrentSpan()
+		external
 		view 
 		returns (uint256 number, uint256 startBlock, uint256 endBlock);	
 
-	function currentSpanNumber() 
-		external 
-		view 
+	function getNextSpan()
+		external
+		view
+		returns (uint256 number, uint256 startBlock, uint256 endBlock);	
+
+	function currentSpanNumber()
+		external
+		view
 		returns (uint256);
 
-  function getSpanByBlock(uint256 number) 
-		external 
-		view 
+	function getSpanByBlock(uint256 number)
+		external
+		view
 		returns (uint256);
 
-  function getBorValidators(uint256 number) 
-		external 
+	function getBorValidators(uint256 number)
+		external
 		view
 		returns (address[] memory, uint256[] memory);
 }
