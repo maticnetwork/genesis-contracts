@@ -13,6 +13,18 @@ interface ValidatorSet {
 		view
 		returns (address[] memory, uint256[] memory);
 
+	// Check if signer is validator
+	function isValidator(uint256 span, address signer)
+		external
+		view
+		returns (bool);
+
+	// Check if signer is producer
+	function isProducer(uint256 span, address signer)
+		external
+		view
+		returns (bool);
+
 	// validate transaction
 	function validateValidatorSet(
 		bytes calldata vote,

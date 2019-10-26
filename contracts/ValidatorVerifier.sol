@@ -2,6 +2,7 @@ pragma solidity ^0.5.11;
 
 import { ValidatorSet } from "./ValidatorSet.sol";
 
+
 contract ValidatorVerifier {
   address constant public validatorSet = 0x0000000000000000000000000000000000001000;
 
@@ -32,5 +33,17 @@ contract ValidatorVerifier {
     bytes memory proof
   ) public {
     ValidatorSet(validatorSet).validateValidatorSet(vote, sigs, txBytes, proof);
+  }
+
+  // check if signer is validator
+  function isValidator(address signer) public view returns (bool) {
+    uint256 span = ValidatorSet(validatorSet).currentSpanNumber();
+    return ValidatorSet(validatorSet).isValidator(span, signer);
+  }
+
+  // check if signer is producer
+  function isProducer(address signer) public view returns (bool) {
+    uint256 span = ValidatorSet(validatorSet).currentSpanNumber();
+    return ValidatorSet(validatorSet).isProducer(span, signer);
   }
 }

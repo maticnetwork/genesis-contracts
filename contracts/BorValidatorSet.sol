@@ -5,10 +5,11 @@ import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { RLPReader } from "solidity-rlp/contracts/RLPReader.sol";
 
 import { BytesLib } from "../matic-contracts/contracts/common/lib/BytesLib.sol";
+import { System } from "./System.sol";
 import { ECVerify } from "./ECVerify.sol";
 import { ValidatorSet } from "./ValidatorSet.sol";
 
-contract BorValidatorSet is ValidatorSet {
+contract BorValidatorSet is System, ValidatorSet {
   using SafeMath for uint256;
   using RLPReader for bytes;
   using RLPReader for RLPReader.RLPItem;
@@ -20,9 +21,6 @@ contract BorValidatorSet is ValidatorSet {
   uint8 public constant VOTE_TYPE = 2;
   uint256 public constant FIRST_END_BLOCK = 255;
 
-  // system address
-  address public constant SYSTEM_ADDRESS = 0xffffFFFfFFffffffffffffffFfFFFfffFFFfFFfE;
-  
   // sprint
   uint256 public sprint;
 
@@ -30,9 +28,9 @@ contract BorValidatorSet is ValidatorSet {
   bool private _isSpanProposalPending;
   
   struct Validator {
-      uint256 id;
-      uint256 power;
-      address signer;
+    uint256 id;
+    uint256 power;
+    address signer;
   }
   
   // span details
@@ -52,11 +50,6 @@ contract BorValidatorSet is ValidatorSet {
   event NewSpan(uint256 indexed id, uint256 indexed startBlock, uint256 indexed endBlock);
 
   constructor() public {}
-
-  modifier onlySystem() {
-    require(msg.sender == SYSTEM_ADDRESS);
-    _;
-  }
 
   modifier onlyValidator() {
     uint256 span = currentSpanNumber();
