@@ -25,6 +25,18 @@ interface ValidatorSet {
 		view
 		returns (bool);
 
+	// Check if signer is current validator
+	function isCurrentValidator(address signer)
+		external
+		view
+		returns (bool);
+
+	// Check if signer is current producer
+	function isCurrentProducer(address signer)
+		external
+		view
+		returns (bool);
+
 	// validate transaction
 	function validateValidatorSet(
 		bytes calldata vote,

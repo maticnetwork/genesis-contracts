@@ -37,13 +37,11 @@ contract ValidatorVerifier {
 
   // check if signer is validator
   function isValidator(address signer) public view returns (bool) {
-    uint256 span = ValidatorSet(validatorSet).currentSpanNumber();
-    return ValidatorSet(validatorSet).isValidator(span, signer);
+    return ValidatorSet(validatorSet).isCurrentValidator(signer);
   }
 
   // check if signer is producer
   function isProducer(address signer) public view returns (bool) {
-    uint256 span = ValidatorSet(validatorSet).currentSpanNumber();
-    return ValidatorSet(validatorSet).isProducer(span, signer);
+    return ValidatorSet(validatorSet).isCurrentProducer(signer);
   }
 }

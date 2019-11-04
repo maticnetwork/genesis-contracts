@@ -181,7 +181,7 @@ contract BorValidatorSet is System, ValidatorSet {
     }
     return false;
   }
-  
+
   function isProducer(uint256 span, address signer) public view returns (bool) {
     Validator[] memory vals = producers[span];
     for (uint256 i = 0; i < vals.length; i++) {
@@ -190,6 +190,14 @@ contract BorValidatorSet is System, ValidatorSet {
       }
     }
     return false;
+  }
+
+  function isCurrentValidator(address signer) public view returns (bool) {
+    return isValidator(currentSpanNumber(), signer);
+  }
+
+  function isCurrentProducer(address signer) public view returns (bool) {
+    return isProducer(currentSpanNumber(), signer);
   }
 
   // get bor validator
