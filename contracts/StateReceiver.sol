@@ -25,7 +25,7 @@ contract StateReceiver is System, ValidatorVerifier {
     uint256 stateId
   ) external {
     // check if sender is validator
-    isValidator(msg.sender);
+   require(isValidator(msg.sender),"Invalid validator");
 
     // check if state is already proposed
     require(IterableMapping.contains(proposedStates, stateId) == false, "State already proposed");
