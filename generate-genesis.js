@@ -1,6 +1,13 @@
 const { spawn } = require("child_process")
 const program = require("commander")
+const nunjucks = require("nunjucks")
 const fs = require("fs")
+const web3 = require("web3")
+
+const validators = require("./validators")
+
+// load and execute bor validator set
+require("./generate-borvalidatorset")
 
 program.version("0.0.1")
 program.option("-c, --bor-chain-id <bor-chain-id>", "Bor chain id", "15001")
@@ -72,18 +79,20 @@ Promise.all([
     "MaticChildERC20"
   )
 ]).then(result => {
+  validators.forEach(v => {
+    v.balance = web3.utils.toHex(web3.utils.toWei(String(v.balance)))
+  })
+
   const data = {
-    chainId: program.borChainId
+    chainId: program.borChainId,
+    validators: validators
   }
 
   result.forEach(r => {
     data[r.key] = r.compiledData
   })
 
-  let genesisString = fs.readFileSync(program.template).toString()
-  genesisString = genesisString.replace(/\${(.+)}/gim, function(a, s) {
-    return data[s]
-  })
-
-  fs.writeFileSync(program.output, genesisString)
+  const templateString = fs.readFileSync(program.template).toString()
+  const resultString = nunjucks.renderString(templateString, data)
+  fs.writeFileSync(program.output, resultString)
 })

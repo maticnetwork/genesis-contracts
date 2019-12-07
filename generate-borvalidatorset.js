@@ -36,3 +36,4 @@ const data = {
 const templateString = fs.readFileSync(program.template).toString()
 const resultString = nunjucks.renderString(templateString, data)
 fs.writeFileSync(program.output, resultString)
+console.log("Bor validator set file updated.")

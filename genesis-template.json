@@ -1,6 +1,6 @@
 {
   "config": {
-    "chainId": ${chainId},
+    "chainId": {{chainId}},
     "homesteadBlock": 1,
     "eip150Block": 0,
     "eip150Hash": "0x0000000000000000000000000000000000000000000000000000000000000000",
@@ -27,28 +27,19 @@
   "alloc": {
     "0000000000000000000000000000000000001000": {
       "balance": "0x0",
-      "code": "0x${borValidatorSetContract}"
+      "code": "0x{{borValidatorSetContract}}"
     },
     "0000000000000000000000000000000000001001": {
       "balance": "0x0",
-      "code": "0x${borStateReceiverContract}"
+      "code": "0x{{borStateReceiverContract}}"
     },
     "0000000000000000000000000000000000001010": {
       "balance": "0x204fce5e3e25026110000000",
-      "code": "0x${maticChildERC20Contract}"
-    },
-    "6c468CF8c9879006E22EC4029696E005C2319C9D": {
-      "balance": "0x200000000000000000000000000000000000000000000000000000000000000"
-    },
-    "48aA8D4AF32551892FCF08Ad63Be7dD206D46F65": {
-      "balance": "0x200000000000000000000000000000000000000000000000000000000000000"
-    },
-    "61083121D4b6ae002aF0CAD52359ae163e183Ccc": {
-      "balance": "0x200000000000000000000000000000000000000000000000000000000000000"
-    },
-    "aFA4EE2EB4707e51Be14dcf182a03e0C9302BA2C": {
-      "balance": "0x200000000000000000000000000000000000000000000000000000000000000"
-    }
+      "code": "0x{{maticChildERC20Contract}}"
+    }{% for v in validators %},
+    "{{ v.address.replace('0x', '') }}": {
+      "balance": "{{ v.balance }}"
+    }{% endfor %}
   },
   "number": "0x0",
   "gasUsed": "0x0",
