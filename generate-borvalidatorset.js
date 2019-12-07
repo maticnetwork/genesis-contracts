@@ -1,0 +1,38 @@
+const program = require("commander")
+const fs = require("fs")
+const nunjucks = require("nunjucks")
+const validators = require("./validators")
+
+program.version("0.0.1")
+program.option("--bor-chain-id <bor-chain-id>", "Bor chain id", "15001")
+program.option(
+  "--heimdall-chain-id <heimdall-chain-id>",
+  "Heimdall chain id",
+  "heimdall-P5rXwg"
+)
+program.option(
+  "--first-end-block <first-end-block>",
+  "End block for first span",
+  "255"
+)
+program.option(
+  "-o, --output <output-file>",
+  "BorValidatorSet.sol",
+  "./contracts/BorValidatorSet.sol"
+)
+program.option(
+  "-t, --template <template>",
+  "BorValidatorSet template file",
+  "./contracts/BorValidatorSet.template"
+)
+program.parse(process.argv)
+
+const data = {
+  borChainId: program.borChainId,
+  heimdallChainId: program.heimdallChainId,
+  firstEndBlock: program.firstEndBlock,
+  validators: validators
+}
+const templateString = fs.readFileSync(program.template).toString()
+const resultString = nunjucks.renderString(templateString, data)
+fs.writeFileSync(program.output, resultString)
