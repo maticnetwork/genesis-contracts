@@ -1,6 +1,7 @@
 const program = require("commander")
 const fs = require("fs")
 const nunjucks = require("nunjucks")
+const web3 = require("web3")
 const validators = require("./validators")
 
 program.version("0.0.1")
@@ -26,6 +27,11 @@ program.option(
   "./contracts/BorValidatorSet.template"
 )
 program.parse(process.argv)
+
+// process validators
+validators.forEach(v => {
+  v.address = web3.utils.toChecksumAddress(v.address)
+})
 
 const data = {
   borChainId: program.borChainId,

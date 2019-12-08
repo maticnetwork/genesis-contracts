@@ -34,7 +34,7 @@
       "code": "0x{{borStateReceiverContract}}"
     },
     "0000000000000000000000000000000000001010": {
-      "balance": "0x204fce5e3e25026110000000",
+      "balance": "{{ maticChildERC20ContractBalance }}",
       "code": "0x{{maticChildERC20Contract}}"
     }{% for v in validators %},
     "{{ v.address.replace('0x', '') }}": {

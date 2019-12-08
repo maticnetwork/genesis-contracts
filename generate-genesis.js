@@ -79,13 +79,21 @@ Promise.all([
     "MaticChildERC20"
   )
 ]).then(result => {
+  const totalMaticSupply = web3.utils.toBN("10000000000")
+
+  var validatorsBalance = web3.utils.toBN(0)
   validators.forEach(v => {
+    validatorsBalance = validatorsBalance.add(web3.utils.toBN(v.balance))
     v.balance = web3.utils.toHex(web3.utils.toWei(String(v.balance)))
   })
 
+  const contractBalance = totalMaticSupply.sub(validatorsBalance)
   const data = {
     chainId: program.borChainId,
-    validators: validators
+    validators: validators,
+    maticChildERC20ContractBalance: web3.utils.toHex(
+      web3.utils.toWei(contractBalance.toString())
+    )
   }
 
   result.forEach(r => {
