@@ -1,6 +1,13 @@
 const { spawn } = require("child_process")
 const program = require("commander")
+const nunjucks = require("nunjucks")
 const fs = require("fs")
+const web3 = require("web3")
+
+const validators = require("./validators")
+
+// load and execute bor validator set
+require("./generate-borvalidatorset")
 
 program.version("0.0.1")
 program.option("-c, --bor-chain-id <bor-chain-id>", "Bor chain id", "15001")
@@ -72,18 +79,28 @@ Promise.all([
     "MaticChildERC20"
   )
 ]).then(result => {
+  const totalMaticSupply = web3.utils.toBN("10000000000")
+
+  var validatorsBalance = web3.utils.toBN(0)
+  validators.forEach(v => {
+    validatorsBalance = validatorsBalance.add(web3.utils.toBN(v.balance))
+    v.balance = web3.utils.toHex(web3.utils.toWei(String(v.balance)))
+  })
+
+  const contractBalance = totalMaticSupply.sub(validatorsBalance)
   const data = {
-    chainId: program.borChainId
+    chainId: program.borChainId,
+    validators: validators,
+    maticChildERC20ContractBalance: web3.utils.toHex(
+      web3.utils.toWei(contractBalance.toString())
+    )
   }
 
   result.forEach(r => {
     data[r.key] = r.compiledData
   })
 
-  let genesisString = fs.readFileSync(program.template).toString()
-  genesisString = genesisString.replace(/\${(.+)}/gim, function(a, s) {
-    return data[s]
-  })
-
-  fs.writeFileSync(program.output, genesisString)
+  const templateString = fs.readFileSync(program.template).toString()
+  const resultString = nunjucks.renderString(templateString, data)
+  fs.writeFileSync(program.output, resultString)
 })
