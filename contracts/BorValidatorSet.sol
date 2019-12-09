@@ -221,16 +221,10 @@ contract BorValidatorSet is System, ValidatorSet {
 
   /// Get current validator set (last enacted or initial if no changes ever made) with current stake.
   function getInitialValidators() public view returns (address[] memory, uint256[] memory) {
-    address[] memory addrs = new address[](4);
+    address[] memory addrs = new address[](1);
     addrs[0] = 0x6c468CF8c9879006E22EC4029696E005C2319C9D;
-    addrs[1] = 0x48aA8D4AF32551892FCF08Ad63Be7dD206D46F65;
-    addrs[2] = 0x61083121D4b6ae002aF0CAD52359ae163e183Ccc;
-    addrs[3] = 0xaFA4EE2EB4707e51Be14dcf182a03e0C9302BA2C;
-    uint256[] memory powers = new uint256[](4);
+    uint256[] memory powers = new uint256[](1);
     powers[0] = 10;
-    powers[1] = 20;
-    powers[2] = 30;
-    powers[3] = 40;
     return (addrs, powers);
   }
 
