@@ -16,6 +16,8 @@ $ git submodule init
 $ git submodule update
 $ cd matic-contracts
 $ npm install
+$ npm run template:process
+$ npm run truffle:compile
 ```
 
 Following command will generate `BorValidatorSet.sol` file from `BorValidatorSet.template` file.
