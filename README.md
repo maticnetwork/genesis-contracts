@@ -16,7 +16,7 @@ $ git submodule init
 $ git submodule update
 $ cd matic-contracts
 $ npm install
-$ npm run template:process
+$ node scripts/process-templates.js --bor-chain-id <bor-chain-id>
 $ npm run truffle:compile
 ```
 
@@ -32,5 +32,5 @@ Following command will generate `genesis.json` file from `genesis-template.json`
 
 ```bash
 # Generate genesis file
-$ node generate-genesis.js
+$ node generate-genesis.js --bor-chain-id <bor-chain-id> --heimdall-chain-id <heimdall-chain-id>
 ```
