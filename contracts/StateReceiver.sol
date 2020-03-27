@@ -56,8 +56,11 @@ contract StateReceiver is System, ValidatorVerifier {
     if (isContract(contractAddress)) {
       IStateReceiver(contractAddress).onStateReceive(stateId, stateData);
     }
+  }
 
-    // commit state
+  // finalize new state
+  function finalizeState(uint256 stateId) external onlySystem {
+    // change state to done
     states[stateId] = true;
 
     // delete proposed state
