@@ -45,23 +45,24 @@ contract StateReceiver is System, ValidatorVerifier {
 
     // get data
     uint256 stateId = dataList[0].toUint();
-    address contractAddress = dataList[1].toAddress();
+    address receiver = dataList[1].toAddress();
     bytes memory stateData = dataList[2].toBytes();
 
     // check if state id is proposed and not commited
     require(IterableMapping.contains(proposedStates, stateId) == true, "Invalid proposed state id");
-    require(states[stateId] == false, "Invalid state id");
-
-    // notify state receiver contract
-    if (isContract(contractAddress)) {
-      IStateReceiver(contractAddress).onStateReceive(stateId, stateData);
-    }
+    require(states[stateId] == false, "State was already processed");
 
     // commit state
     states[stateId] = true;
 
     // delete proposed state
     IterableMapping.remove(proposedStates, stateId);
+
+    // notify state receiver contract
+    if (isContract(receiver)) {
+      // (bool success, bytes memory result) =
+      receiver.call(abi.encodeWithSignature("onStateReceive(uint256,bytes)", stateId, stateData));
+    }
   }
 
   // check if address is contract
