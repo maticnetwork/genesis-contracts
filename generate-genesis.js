@@ -52,7 +52,7 @@ function compileContract(key, contractFile, contractName) {
     })
   }).then(compiledData => {
     compiledData = compiledData.replace(
-      `======= ${contractFile}:${contractName} =======\nBinary of the runtime part: `,
+      new RegExp(`======= ${contractFile}:${contractName} =======\nBinary of the runtime part:` + '[ ]?'),
       "@@@@"
     )
 
@@ -75,8 +75,8 @@ Promise.all([
   ),
   compileContract(
     "maticChildERC20Contract",
-    "matic-contracts/contracts/child/MaticChildERC20.sol",
-    "MaticChildERC20"
+    "matic-contracts/contracts/child/MRC20.sol",
+    "MRC20"
   )
 ]).then(result => {
   const totalMaticSupply = web3.utils.toBN("10000000000")
