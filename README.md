@@ -5,6 +5,8 @@
 Setup genesis whenever contracts get changed
 
 ```bash
+$ git submodule init
+$ git submodule update
 $ npm install
 $ npm run truffle:compile
 ```
@@ -12,8 +14,6 @@ $ npm run truffle:compile
 #### Generate genesis file
 
 ```bash
-$ git submodule init
-$ git submodule update
 $ cd matic-contracts
 $ npm install
 $ node scripts/process-templates.js --bor-chain-id <bor-chain-id>
