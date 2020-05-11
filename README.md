@@ -3,10 +3,6 @@
 #### Setup genesis
 
 Setup genesis whenever contracts get changed
-```bash
-$ cd genesis-contracts
-$ git clone git@github.com:maticnetwork/contracts.git matic-contracts
-```
 
 ```bash
 $ npm install
