@@ -144,6 +144,7 @@ contract BorValidatorSet is System, ValidatorSet {
     return getSpanByBlock(block.number);
   }
   
+  // not used ?remove
   function getValidatorsTotalStakeBySpan(uint256 span) public view returns (uint256) {
     Validator[] memory vals = validators[span];
     uint256 result = 0;
@@ -153,6 +154,7 @@ contract BorValidatorSet is System, ValidatorSet {
     return result;
   }
   
+  // not used ?remove
   function getProducersTotalStakeBySpan(uint256 span) public view returns (uint256) {
     Validator[] memory vals = producers[span];
     uint256 result = 0;
@@ -162,6 +164,7 @@ contract BorValidatorSet is System, ValidatorSet {
     return result;
   }
   
+  // not used ?remove
   function getValidatorBySigner(uint256 span, address signer) public view returns (Validator memory result) {
     Validator[] memory vals = validators[span];
     for (uint256 i = 0; i < vals.length; i++) {
@@ -192,10 +195,12 @@ contract BorValidatorSet is System, ValidatorSet {
     return false;
   }
 
+  // not used ?remove
   function isCurrentValidator(address signer) public view returns (bool) {
     return isValidator(currentSpanNumber(), signer);
   }
 
+  // not used ?remove
   function isCurrentProducer(address signer) public view returns (bool) {
     return isProducer(currentSpanNumber(), signer);
   }
@@ -231,31 +236,6 @@ contract BorValidatorSet is System, ValidatorSet {
   /// Get current validator set (last enacted or initial if no changes ever made) with current stake.
   function getValidators() public view returns (address[] memory, uint256[] memory) {
     return getBorValidators(block.number);
-  }
-
-  // send transaction
-  function validateValidatorSet(
-    bytes memory vote,
-    bytes memory sigs,
-    bytes memory txBytes,
-    bytes memory proof
-  ) public {
-    // vote
-    RLPReader.RLPItem[] memory dataList = vote.toRlpItem().toList();
-
-    // check chain id and vote type
-    require(keccak256(dataList[0].toBytes()) == CHAIN, "Chain ID is invalid");
-    require(dataList[1].toUint() == VOTE_TYPE, "Vote type is invalid");
-
-    // validate hash of txBytes was signed as part of the vote
-    require(checkMembership(bytes32(dataList[4].toUint()), sha256(txBytes), proof), "Transaction is invalid");
-
-    // get span
-    uint256 span = currentSpanNumber();
-
-    // check sigs
-    uint256 stakedPower = getStakePowerBySigs(span, keccak256(vote), sigs);
-    require(stakedPower >= getValidatorsTotalStakeBySpan(span).mul(2).div(3).add(1), "Not enought power to change the span");
   }
 
   function proposeSpan() external onlyValidator {
@@ -333,6 +313,7 @@ contract BorValidatorSet is System, ValidatorSet {
   }
 
   // Get stake power by sigs and data hash
+  // validateValidatorSet dep ?remove
   function getStakePowerBySigs(uint256 span, bytes32 dataHash, bytes memory sigs) public view returns (uint256) {
     uint256 stakePower = 0;
     address lastAdd = address(0x0); // cannot have address(0x0) as an owner
@@ -353,7 +334,7 @@ contract BorValidatorSet is System, ValidatorSet {
   }
 
   //
-  // Utility functions
+  // Utility functions validateValidatorSet dep ?remove
   //
   
   function checkMembership(

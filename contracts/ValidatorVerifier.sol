@@ -25,16 +25,6 @@ contract ValidatorVerifier {
     return msg.sender == validatorSet;
   }
 
-  // validate vote
-  function validateValidatorSet(
-    bytes memory vote,
-    bytes memory sigs,
-    bytes memory txBytes,
-    bytes memory proof
-  ) public {
-    ValidatorSet(validatorSet).validateValidatorSet(vote, sigs, txBytes, proof);
-  }
-
   // check if signer is validator
   function isValidator(address signer) public view returns (bool) {
     return ValidatorSet(validatorSet).isCurrentValidator(signer);
