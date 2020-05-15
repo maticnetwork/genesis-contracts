@@ -10,8 +10,9 @@
     "constantinopleBlock": 0,
     "bor": {
       "period": 1,
-      "producerDelay": 4,
+      "producerDelay": 1,
       "sprint": 64,
+      "backupMultiplier": 1,
       "validatorContract": "0x0000000000000000000000000000000000001000",
       "stateReceiverContract": "0x0000000000000000000000000000000000001001"
     }
