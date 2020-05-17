@@ -14,11 +14,7 @@ contract StateReceiver is System {
   // stateId to isSynced
   mapping(uint256 => bool) public states;
 
-  // commit new state
-  function commitState(
-    bytes calldata recordBytes,
-    uint256 syncTime
-  ) external onlySystem {
+  function commitState(uint256 syncTime, bytes calldata recordBytes) external onlySystem {
     require(
       syncTime >= lastStateSyncTime,
       "Attempting to sync states from the past"
