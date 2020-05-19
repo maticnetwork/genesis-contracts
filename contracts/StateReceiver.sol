@@ -17,6 +17,7 @@ contract StateReceiver is System {
       syncTime >= lastStateSyncTime,
       "Attempting to sync states from the past"
     );
+    // ? update at the last
     lastStateSyncTime = syncTime;
 
     // parse state data

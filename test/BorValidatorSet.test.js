@@ -17,30 +17,31 @@ contract('BorValidatorSet', async (accounts) => {
 
         it('check current span be 0', async () => {
             const currentSpan = await testBVS.getCurrentSpan()
-            assert(currentSpan, new BN(0))
+            assertBigNumberEquality(currentSpan.number, new BN(0))
         })
         it('check current sprint be 0', async () => {
             const currentSprint = await testBVS.currentSprint()
-            assert(currentSprint, new BN(0))
+            assertBigNumberEquality(currentSprint, new BN(0))
         })
         it('span for 0th block be 0', async () => {
             const span = await testBVS.getSpanByBlock(0)
-            assert(span, new BN(0))
+            assertBigNumberEquality(span, new BN(0))
         })
-        it('0th Span proposal be false', async () => {
-            const proposal = await testBVS.spanProposalPending()
-            assert.isFalse(proposal)
-        })
-        it('Validator set be null', async () => {
+        it('Validator set be default', async () => {
             const validators = await testBVS.getValidators()
-            assert(validators[0], '0x6c468CF8c9879006E22EC4029696E005C2319C9D')
-            assert(validators[1], new BN(10))
+            assert(validators[0], '0x6c468CF8c9879006E22EC4029696E005C2319C9D') // check address
+            assertBigNumberEquality(validators[1], new BN(40))   // check power
+        })
+        it('Default validator stake', async () => {
+            const validatorTotalStake = await testBVS.getValidatorsTotalStakeBySpan(0)
+            assertBigNumberEquality(validatorTotalStake, new BN(0))
         })
     })
 
     describe('\n commitSpan() \n', async () => {
         let borValidatorSetInstance
         let testBVS
+        let totalStake = 0
 
         before(async function () {
             borValidatorSetInstance = await BorValidatorSet.deployed()
@@ -67,9 +68,7 @@ contract('BorValidatorSet', async (accounts) => {
             }
         })
 
-        it('should pass', async () => {
-            // (0) 0x9fB29AAc15b9A4B7F17c3385939b007540f4d791
-            // (1) 0x96C42C56fdb78294F96B0cFa33c92bed7D75F96a 
+        it('span #0', async () => {
             let validators = [[1, 1, accounts[0]],
             [2, 1, accounts[1]]]
             let producer = [[1, 1, accounts[0]]]
@@ -85,15 +84,17 @@ contract('BorValidatorSet', async (accounts) => {
                 producerBytes,
                 { from: accounts[0] }
             )
-            // current assert span to be 2
-            assert(testBVS.currentSpanNumber(), new BN(2))
+            // current assert span to be 0
+            const currentSpanNumber = await testBVS.currentSpanNumber()
+            assertBigNumberEquality(currentSpan.number, new BN(0))
         })
 
-        it('should pass again', async () => {
-            let validators = [[1, 1, accounts[0]],
-            [2, 1, accounts[1]]]
-            let producer = [[1, 1, accounts[0]]]
+        it('span #1', async () => {
+            let validators = [[0, 2, accounts[0]],
+            [1, 1, accounts[1]]]
+            let producer = [[0, 2, accounts[0]]]
 
+            totalStake += 3 //  2 + 1 
             const validatorBytes = ethUtils.bufferToHex(ethUtils.rlp.encode(validators))
             const producerBytes = ethUtils.bufferToHex(ethUtils.rlp.encode(producer))
             let currentSpan = await testBVS.getCurrentSpan()
@@ -105,19 +106,30 @@ contract('BorValidatorSet', async (accounts) => {
                 producerBytes,
                 { from: accounts[0] }
             )
-            // current assert span to be 3
-            assert(testBVS.currentSpanNumber(), new BN(3))
+            // current assert span to be 1
+            const currentSpanNumber = await testBVS.currentSpanNumber()
+            assertBigNumberEquality(currentSpan.number, new BN(1))
         })
 
-        it('3rd Span proposal be true', async () => {
-            await testBVS.proposeSpan()
-            const proposal = await testBVS.spanProposalPending()
-            assert.isTrue(proposal)
-        })
-
-        it('Validator set for span #3', async () => {
-            const validators = await testBVS.getBorValidators(256)
+        it('Validator set for span #1', async () => {
+            const currentSpan = await testBVS.getCurrentSpan()
+            const validators = await testBVS.getBorValidators(currentSpan.startBlock)
             assert(validators, accounts[0])
+        })
+
+        it('Total staking power for the validators after the span #1', async () => {
+            const currentSpanNumber = await testBVS.currentSpanNumber()
+            const validatorTotalStake = await testBVS.getValidatorsTotalStakeBySpan(currentSpanNumber)
+            assertBigNumberEquality(validatorTotalStake, new BN(totalStake))
         })
     })
 })
+
+function assertBigNumberEquality(num1, num2) {
+    if (!BN.isBN(num1)) num1 = web3.utils.toBN(num1.toString())
+    if (!BN.isBN(num2)) num2 = web3.utils.toBN(num2.toString())
+    assert(
+      num1.eq(num2),
+      `expected ${num1.toString(10)} and ${num2.toString(10)} to be equal`
+    )
+  }

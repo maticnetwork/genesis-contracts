@@ -19,9 +19,6 @@ $ npm run truffle:compile
 ```
 
 ### 3. Generate genesis file
-```bash
-$ npm run truffle:compile
-```
 
 Following command will generate `BorValidatorSet.sol` file from `BorValidatorSet.template` file.
 
@@ -36,4 +33,8 @@ Following command will generate `genesis.json` file from `genesis-template.json`
 ```bash
 # Generate genesis file
 $ node generate-genesis.js --bor-chain-id <bor-chain-id> --heimdall-chain-id <heimdall-chain-id>
+```
+
+```bash
+$ npm run truffle:compile
 ```
