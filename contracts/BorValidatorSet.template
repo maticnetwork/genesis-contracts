@@ -20,7 +20,7 @@ contract BorValidatorSet is System {
   bytes32 public constant BOR_ID = keccak256("{{borChainId}}");
   uint8 public constant VOTE_TYPE = 2;
   uint256 public constant FIRST_END_BLOCK = {{firstEndBlock}};
-  uint256 public constant SPRINT = 4;
+  uint256 public constant SPRINT = 64;
 
   struct Validator {
     uint256 id;

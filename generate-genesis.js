@@ -55,6 +55,7 @@ function compileContract(key, contractFile, contractName) {
       new RegExp(`======= ${contractFile}:${contractName} =======\nBinary of the runtime part:` + '[ ]?'),
       "@@@@"
     )
+
     const matched = compiledData.match(/@@@@\n([a-f0-9]+)/)
     return { key, compiledData: matched[1], contractName, contractFile }
   })
