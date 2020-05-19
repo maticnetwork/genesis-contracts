@@ -9,7 +9,7 @@ import { System } from "./System.sol";
 import { ECVerify } from "./ECVerify.sol";
 import { ValidatorSet } from "./ValidatorSet.sol";
 
-contract BorValidatorSet is System, ValidatorSet {
+contract BorValidatorSet is System {
   using SafeMath for uint256;
   using RLPReader for bytes;
   using RLPReader for RLPReader.RLPItem;
@@ -20,12 +20,7 @@ contract BorValidatorSet is System, ValidatorSet {
   bytes32 public constant BOR_ID = keccak256("{{borChainId}}");
   uint8 public constant VOTE_TYPE = 2;
   uint256 public constant FIRST_END_BLOCK = {{firstEndBlock}};
-
-  // sprint
-  uint256 public sprint;
-
-  // pending span proposal
-  bool private _isSpanProposalPending;
+  uint256 public constant SPRINT = 64;
 
   struct Validator {
     uint256 id;
@@ -58,8 +53,6 @@ contract BorValidatorSet is System, ValidatorSet {
   }
 
   function setInitialValidators() internal {
-    sprint = 64;
-
     address[] memory d;
     uint256[] memory p;
 
@@ -97,7 +90,7 @@ contract BorValidatorSet is System, ValidatorSet {
   }
 
   function currentSprint() public view returns (uint256) {
-    return block.number / 64;
+    return block.number / SPRINT;
   }
 
   function getSpan(uint256 span) public view returns (uint256 number, uint256 startBlock, uint256 endBlock) {
@@ -233,44 +226,6 @@ contract BorValidatorSet is System, ValidatorSet {
     return getBorValidators(block.number);
   }
 
-  // send transaction
-  function validateValidatorSet(
-    bytes memory vote,
-    bytes memory sigs,
-    bytes memory txBytes,
-    bytes memory proof
-  ) public {
-    // vote
-    RLPReader.RLPItem[] memory dataList = vote.toRlpItem().toList();
-
-    // check chain id and vote type
-    require(keccak256(dataList[0].toBytes()) == CHAIN, "Chain ID is invalid");
-    require(dataList[1].toUint() == VOTE_TYPE, "Vote type is invalid");
-
-    // validate hash of txBytes was signed as part of the vote
-    require(checkMembership(bytes32(dataList[4].toUint()), sha256(txBytes), proof), "Transaction is invalid");
-
-    // get span
-    uint256 span = currentSpanNumber();
-
-    // check sigs
-    uint256 stakedPower = getStakePowerBySigs(span, keccak256(vote), sigs);
-    require(stakedPower >= getValidatorsTotalStakeBySpan(span).mul(2).div(3).add(1), "Not enought power to change the span");
-  }
-
-  function proposeSpan() external onlyValidator {
-    require(_isSpanProposalPending == false);
-    _isSpanProposalPending = true;
-  }
-
-  // Pending span proposal
-	function spanProposalPending()
-		public
-		view
-		returns (bool) {
-    return _isSpanProposalPending;
-  }
-
   function commitSpan(
     uint256 newSpan,
     uint256 startBlock,
@@ -288,7 +243,7 @@ contract BorValidatorSet is System, ValidatorSet {
     // check conditions
     require(newSpan == span.add(1), "Invalid span id");
     require(endBlock > startBlock, "End block must be greater than start block");
-    require((endBlock - startBlock + 1) % sprint == 0, "Difference between start and end block must be in multiples of sprint");
+    require((endBlock - startBlock + 1) % SPRINT == 0, "Difference between start and end block must be in multiples of sprint");
     require(spans[span].startBlock <= startBlock, "Start block must be greater than current span");
 
     // check if already in the span
@@ -327,9 +282,6 @@ contract BorValidatorSet is System, ValidatorSet {
           signer: v[2].toAddress()
         });
     }
-
-    // clear pending span proposal
-    _isSpanProposalPending = false;
   }
 
   // Get stake power by sigs and data hash

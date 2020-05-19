@@ -3,20 +3,23 @@
 #### Setup genesis
 
 Setup genesis whenever contracts get changed
-
+### 1. Install dependencies and submodules
 ```bash
+$ npm install
 $ git submodule init
 $ git submodule update
-$ npm install
-$ npm run truffle:compile
 ```
 
-#### Generate genesis file
-
+### 2. Compile Matic contracts
 ```bash
 $ cd matic-contracts
 $ npm install
 $ node scripts/process-templates.js --bor-chain-id <bor-chain-id>
+$ npm run truffle:compile
+```
+
+### 3. Generate genesis file
+```bash
 $ npm run truffle:compile
 ```
 
