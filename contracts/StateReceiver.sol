@@ -32,7 +32,7 @@ contract StateReceiver is System {
     bytes memory stateData = dataList[2].toBytes();
     // notify state receiver contract, in a non-revert manner
     if (isContract(receiver)) {
-      uint256 txGas = 1000000;
+      uint256 txGas = 5000000;
       bytes memory data = abi.encodeWithSignature("onStateReceive(uint256,bytes)", stateId, stateData);
       // solium-disable-next-line security/no-inline-assembly
       assembly {
