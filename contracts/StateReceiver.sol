@@ -10,7 +10,7 @@ contract StateReceiver is System {
   using RLPReader for RLPReader.RLPItem;
 
   uint256 public lastStateSyncTime;
-  uint256 public nextStateId;
+  uint256 public lastStateId;
 
   function commitState(uint256 syncTime, bytes calldata recordBytes) onlySystem external returns(bool success) {
     require(
@@ -23,19 +23,20 @@ contract StateReceiver is System {
     RLPReader.RLPItem[] memory dataList = recordBytes.toRlpItem().toList();
     uint256 stateId = dataList[0].toUint();
     require(
-      nextStateId == stateId,
+      lastStateId + 1 == stateId,
       "StateIds are not sequential"
     );
-    nextStateId++;
+    lastStateId++;
 
     address receiver = dataList[1].toAddress();
     bytes memory stateData = dataList[2].toBytes();
     // notify state receiver contract, in a non-revert manner
     if (isContract(receiver)) {
       uint256 txGas = 1000000;
+      bytes memory data = abi.encodeWithSignature("onStateReceive(uint256,bytes)", stateId, stateData);
       // solium-disable-next-line security/no-inline-assembly
       assembly {
-        success := call(txGas, receiver, 0, add(stateData, 0x20), mload(stateData), 0, 0)
+        success := call(txGas, receiver, 0, add(data, 0x20), mload(data), 0, 0)
       }
     }
   }
