@@ -10,11 +10,9 @@ contract StateReceiver is System {
   using RLPReader for RLPReader.RLPItem;
 
   uint256 public lastStateSyncTime;
+  uint256 public nextStateId;
 
-  // stateId to isSynced
-  mapping(uint256 => bool) public states;
-
-  function commitState(uint256 syncTime, bytes calldata recordBytes) external onlySystem {
+  function commitState(uint256 syncTime, bytes calldata recordBytes) onlySystem external returns(bool success) {
     require(
       syncTime >= lastStateSyncTime,
       "Attempting to sync states from the past"
@@ -24,16 +22,21 @@ contract StateReceiver is System {
     // parse state data
     RLPReader.RLPItem[] memory dataList = recordBytes.toRlpItem().toList();
     uint256 stateId = dataList[0].toUint();
+    require(
+      nextStateId == stateId,
+      "StateIds are not sequential"
+    );
+    nextStateId++;
+
     address receiver = dataList[1].toAddress();
     bytes memory stateData = dataList[2].toBytes();
-
-    require(states[stateId] == false, "State was already processed");
-    states[stateId] = true;
-
     // notify state receiver contract, in a non-revert manner
     if (isContract(receiver)) {
-      // (bool success, bytes memory result) =
-      receiver.call(abi.encodeWithSignature("onStateReceive(uint256,bytes)", stateId, stateData));
+      uint256 txGas = 1000000;
+      // solium-disable-next-line security/no-inline-assembly
+      assembly {
+        success := call(txGas, receiver, 0, add(stateData, 0x20), mload(stateData), 0, 0)
+      }
     }
   }
 
