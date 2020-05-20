@@ -8,6 +8,8 @@ const IterableMapping = artifacts.require('IterableMapping')
 const RLPReader = artifacts.require('RLPReader')
 const SafeMath = artifacts.require('SafeMath')
 const StateReciever = artifacts.require('StateReceiver')
+const TestStateReceiver = artifacts.require('TestStateReceiver')
+const TestCommitState = artifacts.require('TestCommitState')
 const System = artifacts.require('System')
 const ValidatorVerifier = artifacts.require('ValidatorVerifier')
 
@@ -22,15 +24,15 @@ const libDeps = [
     },
     {
         lib: IterableMapping,
-        contracts: [StateReciever]
+        contracts: [StateReciever, TestStateReceiver]
     },
     {
         lib: RLPReader,
-        contracts: [BorValidatorSet, TestBorValidatorSet, StateReciever]
+        contracts: [BorValidatorSet, TestBorValidatorSet, StateReciever, TestStateReceiver]
     },
     {
         lib: SafeMath,
-        contracts: [BorValidatorSet, TestBorValidatorSet, StateReciever]
+        contracts: [BorValidatorSet, TestBorValidatorSet, StateReciever, TestStateReceiver]
     }
 ]
 
@@ -46,7 +48,9 @@ module.exports = async function (deployer, network) {
         await deployer.deploy(BorValidatorSet)
         await deployer.deploy(TestBorValidatorSet)
         await deployer.deploy(StateReciever)
+        await deployer.deploy(TestStateReceiver)
         await deployer.deploy(System)
         await deployer.deploy(ValidatorVerifier)
+        await deployer.deploy(TestCommitState)
     })
 }
