@@ -9,16 +9,9 @@ contract StateReceiver is System {
   using RLPReader for bytes;
   using RLPReader for RLPReader.RLPItem;
 
-  uint256 public lastStateSyncTime;
   uint256 public lastStateId;
 
   function commitState(uint256 syncTime, bytes calldata recordBytes) onlySystem external returns(bool success) {
-    require(
-      syncTime >= lastStateSyncTime,
-      "Attempting to sync states from the past"
-    );
-    lastStateSyncTime = syncTime;
-
     // parse state data
     RLPReader.RLPItem[] memory dataList = recordBytes.toRlpItem().toList();
     uint256 stateId = dataList[0].toUint();
