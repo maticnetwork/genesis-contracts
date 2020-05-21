@@ -14,7 +14,6 @@ contract('StateReceiver', async (accounts) => {
             testCommitState = await TestCommitState.deployed()
             testCommitStateAddr = testCommitState.address
         })
-
         it('fail with a dummy record data', async () => {
             let recordBytes = "dummy-data"
             recordBytes = ethUtils.bufferToHex(ethUtils.rlp.encode(recordBytes))
@@ -60,7 +59,6 @@ contract('StateReceiver', async (accounts) => {
             assert.strictEqual(data, stateData)
         })
     })
-    
 })
 
 function assertBigNumberEquality(num1, num2) {
@@ -71,3 +69,4 @@ function assertBigNumberEquality(num1, num2) {
       `expected ${num1.toString(10)} and ${num2.toString(10)} to be equal`
     )
   }
+  
