@@ -31,7 +31,7 @@ contract('BorValidatorSet', async (accounts) => {
             assertBigNumberEquality(validatorTotalStake, new BN(0))
         })
     })
-    describe('\n commitSpan() \n', async () => {
+    describe.only('commitSpan()', async () => {
         let testBVS
         let totalStake = 0
 
@@ -78,13 +78,13 @@ contract('BorValidatorSet', async (accounts) => {
             assertBigNumberEquality(currentSpan.number, new BN(1))
             // this span is not yet committed
             const nextSpan = await testBVS.getNextSpan()
-            assertBigNumberEquality(nextSpan.number, new BN(2))
+            assertBigNumberEquality(nextSpan.number, new BN(0))
         })
         it('commiting span #2', async () => {
             let validators = [[0, 2, accounts[0]],
             [1, 1, accounts[1]]]
             let producer = [[0, 2, accounts[0]]]
-            totalStake += 3 //  2 + 1 
+            totalStake += 3 //  2 + 1
             const validatorBytes = ethUtils.bufferToHex(ethUtils.rlp.encode(validators))
             const producerBytes = ethUtils.bufferToHex(ethUtils.rlp.encode(producer))
             let currentSpan = await testBVS.getCurrentSpan()
@@ -126,4 +126,12 @@ function assertBigNumberEquality(num1, num2) {
       num1.eq(num2),
       `expected ${num1.toString(10)} and ${num2.toString(10)} to be equal`
     )
-  }
+}
+
+function printSpan(span) {
+    console.log({
+        number: span.number.toString(),
+        startBlock: span.startBlock.toString(),
+        endBlock: span.endBlock.toString()
+    })
+}
