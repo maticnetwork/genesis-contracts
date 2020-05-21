@@ -31,7 +31,7 @@ contract('BorValidatorSet', async (accounts) => {
             assertBigNumberEquality(validatorTotalStake, new BN(0))
         })
     })
-    describe.only('commitSpan()', async () => {
+    describe('commitSpan()', async () => {
         let testBVS
         let totalStake = 0
 
