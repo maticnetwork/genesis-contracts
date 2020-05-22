@@ -8,7 +8,7 @@ contract TestSystem {
   }
 
   modifier onlySystem() {
-    require(msg.sender == dummySystem);
+    require(msg.sender == dummySystem, "Not System Addess!");
     _;
   }
 }
