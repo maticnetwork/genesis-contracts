@@ -10,7 +10,6 @@ const SafeMath = artifacts.require('SafeMath')
 const StateReciever = artifacts.require('StateReceiver')
 const TestStateReceiver = artifacts.require('TestStateReceiver')
 const TestCommitState = artifacts.require('TestCommitState')
-const TestCommitStateFail = artifacts.require('TestCommitStateFail')
 const System = artifacts.require('System')
 const ValidatorVerifier = artifacts.require('ValidatorVerifier')
 
@@ -46,13 +45,14 @@ module.exports = async function (deployer, network) {
         })
 
         console.log("Deploying contracts...")
-        await deployer.deploy(BorValidatorSet)
-        await deployer.deploy(TestBorValidatorSet)
-        await deployer.deploy(StateReciever)
-        await deployer.deploy(TestStateReceiver)
-        await deployer.deploy(System)
-        await deployer.deploy(ValidatorVerifier)
-        await deployer.deploy(TestCommitState)
-        await deployer.deploy(TestCommitStateFail)
+        await Promise.all([
+            deployer.deploy(BorValidatorSet),
+            deployer.deploy(TestBorValidatorSet),
+            deployer.deploy(StateReciever),
+            deployer.deploy(TestStateReceiver),
+            deployer.deploy(System),
+            deployer.deploy(ValidatorVerifier),
+            deployer.deploy(TestCommitState)
+        ])
     })
 }
