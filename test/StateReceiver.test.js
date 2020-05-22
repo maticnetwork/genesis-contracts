@@ -1,6 +1,7 @@
 const ethUtils = require('ethereumjs-util')
 const TestStateReceiver = artifacts.require('TestStateReceiver')
 const TestCommitState = artifacts.require('TestCommitState')
+const TestCommitStateFail = artifacts.require('TestCommitStateFail')
 const BN = ethUtils.BN
 
 contract('StateReceiver', async (accounts) => {
@@ -13,6 +14,8 @@ contract('StateReceiver', async (accounts) => {
             testStateReceiver.setSystemAddress(accounts[0])
             testCommitState = await TestCommitState.deployed()
             testCommitStateAddr = testCommitState.address
+            testCommitStateFail = await TestCommitStateFail.deployed()
+            testCommitStateFailAddr = testCommitStateFail.address
         })
         it('fail with a dummy record data', async () => {
             let recordBytes = "dummy-data"
@@ -24,39 +27,66 @@ contract('StateReceiver', async (accounts) => {
                 assert(error.message.search('revert') >= 0, "Expected revert, got '" + error + "' instead")
             }
         })
-        it('commit the state (stateID #1) and check id & data', async () => {
-            // .decode(data, (address, address, uint256, uint256));
-            // depositTokens(rootToken, user, amountOrTokenId, depositId);
+        it('commit the state #1 (stateID #1) and check id & data', async () => {
             const dummyAddr = "0x0000000000000000000000000000000000000000"
             const stateData = web3.eth.abi.encodeParameters(
                   ['address', 'address', 'uint256', 'uint256'],
                   [dummyAddr, accounts[0], 0, 0])
-            const stateID =1
+            let stateID = 1
             let recordBytes = [stateID, testCommitStateAddr, stateData]
             recordBytes = ethUtils.bufferToHex(ethUtils.rlp.encode(recordBytes))
-            const result = await testStateReceiver.commitState(0,recordBytes)
-
+            let result = await testStateReceiver.commitState.call(0,recordBytes)
+            assert.isTrue(result)
+            result = await testStateReceiver.commitState(0,recordBytes)
             const id = await testCommitState.id()
             const data = await testCommitState.data()
             assertBigNumberEquality(id, new BN(stateID))
             assert.strictEqual(data, stateData)
         })
-        it('commit the state (stateID #2) and check id & data', async () => {
+        it('commit the state #2 (stateID #2) and check id & data', async () => {
+            const dummyAddr = "0x0000000000000000000000000000000000000001"
+            const stateData = web3.eth.abi.encodeParameters(
+                  ['address', 'address', 'uint256', 'uint256'],
+                  [dummyAddr, accounts[0], 0, 0])
+            let stateID = 2
+            let recordBytes = [stateID, testCommitStateAddr, stateData]
+            recordBytes = ethUtils.bufferToHex(ethUtils.rlp.encode(recordBytes))
+            let result = await testStateReceiver.commitState.call(0,recordBytes)
+            assert.isTrue(result)
+            result = await testStateReceiver.commitState(0,recordBytes)
+            const id = await testCommitState.id()
+            const data = await testCommitState.data()
+            assertBigNumberEquality(id, new BN(stateID))
+            assert.strictEqual(data, stateData)
+        })
+        it('should revert (calling from a non-system address', async () => {
             // .decode(data, (address, address, uint256, uint256));
             // depositTokens(rootToken, user, amountOrTokenId, depositId);
             const dummyAddr = "0x0000000000000000000000000000000000000001"
             const stateData = web3.eth.abi.encodeParameters(
                   ['address', 'address', 'uint256', 'uint256'],
-                  [dummyAddr, accounts[1], 0, 0])
-            const stateID =2
+                  [dummyAddr, accounts[0], 0, 0])
+            const stateID = 3
             let recordBytes = [stateID, testCommitStateAddr, stateData]
             recordBytes = ethUtils.bufferToHex(ethUtils.rlp.encode(recordBytes))
-            const result = await testStateReceiver.commitState(0,recordBytes)
-
-            const id = await testCommitState.id()
-            const data = await testCommitState.data()
-            assertBigNumberEquality(id, new BN(stateID))
-            assert.strictEqual(data, stateData)
+                try {
+                    const result = await testStateReceiver.commitState(0,recordBytes,
+                        {from: accounts[1]})
+                    assert.fail("Non-System Address was able to commit state")               
+                } catch (error) {
+                    assert(error.message.search('revert') >= 0, "Expected revert, got '" + error + "' instead")
+                }
+        })
+        it('Infinite loop: ', async () => {
+            const dummyAddr = "0x0000000000000000000000000000000000000001"
+            const stateData = web3.eth.abi.encodeParameters(
+                  ['address', 'address', 'uint256', 'uint256'],
+                  [dummyAddr, accounts[0], 0, 0])
+            const stateID = 3
+            let recordBytes = [stateID, testCommitStateFailAddr, stateData]
+            recordBytes = ethUtils.bufferToHex(ethUtils.rlp.encode(recordBytes))
+            const result = await testStateReceiver.commitState.call(0,recordBytes)
+            assert.isFalse(result)
         })
     })
 })

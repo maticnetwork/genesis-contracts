@@ -59,54 +59,25 @@ contract('BorValidatorSet', async (accounts) => {
         })
         it('committing span #1', async () => {
             let currentSpan = await testBVS.getCurrentSpan()
-            let validators = await testBVS.getBorValidators(currentSpan.startBlock)
-            validators = [[1, 1, accounts[0]],
-            [2, 1, accounts[1]]]
-            let producer = [[1, 1, accounts[0]]]
-            const validatorBytes = ethUtils.bufferToHex(ethUtils.rlp.encode(validators))
-            const producerBytes = ethUtils.bufferToHex(ethUtils.rlp.encode(producer))
-            const result = await testBVS.commitSpan(
-                currentSpan.number.add(new BN(1)),
-                currentSpan.endBlock.add(new BN(1)),
-                currentSpan.endBlock.add(new BN(256)),
-                validatorBytes,
-                producerBytes,
-                { from: accounts[0] }
-            )
-            // assert next span to be 1
-            currentSpan = await testBVS.getCurrentSpan()
-            assertBigNumberEquality(currentSpan.number, new BN(1))
-            // this span is not yet committed
-            const nextSpan = await testBVS.getNextSpan()
-            assertBigNumberEquality(nextSpan.number, new BN(2))
-        })
-        it('commiting span #2', async () => {
             let validators = [[0, 2, accounts[0]],
             [1, 1, accounts[1]]]
             let producer = [[0, 2, accounts[0]]]
             totalStake += 3 //  2 + 1 
             const validatorBytes = ethUtils.bufferToHex(ethUtils.rlp.encode(validators))
             const producerBytes = ethUtils.bufferToHex(ethUtils.rlp.encode(producer))
-            let currentSpan = await testBVS.getCurrentSpan()
-            await testBVS.commitSpan(
-                currentSpan.number.add(new BN(1)),
-                currentSpan.endBlock.add(new BN(1)),
-                currentSpan.endBlock.add( new BN(256)),
+            const result = await testBVS.commitSpan(
+                new BN(1),
+                new BN(256),
+                new BN(511),
                 validatorBytes,
                 producerBytes,
                 { from: accounts[0] }
             )
-            currentSpan = await testBVS.getCurrentSpan()
-            // assert span to be 2
+            // assert next span to be 1
             const nextSpan = await testBVS.getNextSpan()
-            assertBigNumberEquality(nextSpan.number, new BN(2))
+            assertBigNumberEquality(nextSpan.number, new BN(1))
         })
         it('Validator set for span #1', async () => {
-            const currentSpan = await testBVS.getCurrentSpan()
-            const validators = await testBVS.getBorValidators(currentSpan.startBlock)
-            assert.strictEqual(validators[0][0], accounts[0])
-        })
-        it('Validator set for span #2', async () => {
             const nextSpan = await testBVS.getNextSpan()
             const validators = await testBVS.getBorValidators(nextSpan.startBlock)
             assert.strictEqual(validators[0][0], accounts[0])

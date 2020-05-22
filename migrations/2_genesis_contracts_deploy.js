@@ -10,6 +10,7 @@ const SafeMath = artifacts.require('SafeMath')
 const StateReciever = artifacts.require('StateReceiver')
 const TestStateReceiver = artifacts.require('TestStateReceiver')
 const TestCommitState = artifacts.require('TestCommitState')
+const TestCommitStateFail = artifacts.require('TestCommitStateFail')
 const System = artifacts.require('System')
 const ValidatorVerifier = artifacts.require('ValidatorVerifier')
 
@@ -52,5 +53,6 @@ module.exports = async function (deployer, network) {
         await deployer.deploy(System)
         await deployer.deploy(ValidatorVerifier)
         await deployer.deploy(TestCommitState)
+        await deployer.deploy(TestCommitStateFail)
     })
 }
