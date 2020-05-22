@@ -16,9 +16,15 @@ $ cd matic-contracts
 $ npm install
 $ node scripts/process-templates.js --bor-chain-id <bor-chain-id>
 $ npm run truffle:compile
+$ cd ..
 ```
 
-### 3. Generate genesis file
+### 3. Compile contracts
+```bash
+$ npm run truffle:compile
+```
+
+### 4. Generate genesis file
 
 Following command will generate `BorValidatorSet.sol` file from `BorValidatorSet.template` file.
 
@@ -35,6 +41,8 @@ Following command will generate `genesis.json` file from `genesis-template.json`
 $ node generate-genesis.js --bor-chain-id <bor-chain-id> --heimdall-chain-id <heimdall-chain-id>
 ```
 
+### 5. Run Tests
 ```bash
-$ npm run truffle:compile
+$ npm run testrpc
+$ npm test
 ```
