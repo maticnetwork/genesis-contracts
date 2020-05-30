@@ -37,14 +37,6 @@ interface ValidatorSet {
 		view
 		returns (bool);
 
-	// validate transaction
-	function validateValidatorSet(
-		bytes calldata vote,
-		bytes calldata sigs,
-		bytes calldata txBytes,
-		bytes calldata proof
-	) external;
-
 	// Propose new span
 	function proposeSpan()
 		external;

@@ -1,67 +1,36 @@
 pragma solidity ^0.5.11;
 
-import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { RLPReader } from "solidity-rlp/contracts/RLPReader.sol";
 
 import { System } from "./System.sol";
-import { ValidatorVerifier } from "./ValidatorVerifier.sol";
 import { IStateReceiver } from "./IStateReceiver.sol";
-import { IterableMapping } from "./IterableMapping.sol";
 
-
-contract StateReceiver is System, ValidatorVerifier {
-  using SafeMath for uint256;
+contract StateReceiver is System {
   using RLPReader for bytes;
   using RLPReader for RLPReader.RLPItem;
 
-  // proposed states
-  IterableMapping.Map private proposedStates;
+  uint256 public lastStateId;
 
-  // states and proposed states
-  mapping(uint256 => bool) public states;
-
-  // add pending state
-  function proposeState(
-    uint256 stateId
-  ) external {
-    // check if sender is validator
-   require(isValidator(msg.sender),"Invalid validator");
-
-    // check if state is already proposed
-    require(IterableMapping.contains(proposedStates, stateId) == false, "State already proposed");
-
-    // state should not prense
-    require(states[stateId] == false, "State already committed");
-
-    // propose state by adding it into proposed states
-    IterableMapping.insert(proposedStates, stateId, true);
-  }
-
-  // commit new state
-  function commitState(
-    bytes calldata recordBytes
-  ) external onlySystem {
+  function commitState(uint256 syncTime, bytes calldata recordBytes) onlySystem external returns(bool success) {
+    // parse state data
     RLPReader.RLPItem[] memory dataList = recordBytes.toRlpItem().toList();
-
-    // get data
     uint256 stateId = dataList[0].toUint();
+    require(
+      lastStateId + 1 == stateId,
+      "StateIds are not sequential"
+    );
+    lastStateId++;
+
     address receiver = dataList[1].toAddress();
     bytes memory stateData = dataList[2].toBytes();
-
-    // check if state id is proposed and not commited
-    require(IterableMapping.contains(proposedStates, stateId) == true, "Invalid proposed state id");
-    require(states[stateId] == false, "State was already processed");
-
-    // commit state
-    states[stateId] = true;
-
-    // delete proposed state
-    IterableMapping.remove(proposedStates, stateId);
-
-    // notify state receiver contract
+    // notify state receiver contract, in a non-revert manner
     if (isContract(receiver)) {
-      // (bool success, bytes memory result) =
-      receiver.call(abi.encodeWithSignature("onStateReceive(uint256,bytes)", stateId, stateData));
+      uint256 txGas = 5000000;
+      bytes memory data = abi.encodeWithSignature("onStateReceive(uint256,bytes)", stateId, stateData);
+      // solium-disable-next-line security/no-inline-assembly
+      assembly {
+        success := call(txGas, receiver, 0, add(data, 0x20), mload(data), 0, 0)
+      }
     }
   }
 
@@ -72,19 +41,5 @@ contract StateReceiver is System, ValidatorVerifier {
       size := extcodesize(_addr)
     }
     return (size > 0);
-  }
-
-  // get pending state ids
-  function getPendingStates() public view returns (uint256[] memory) {
-    uint256 index = 0;
-    uint256[] memory result = new uint256[](proposedStates.size);
-    for (uint256 i = IterableMapping.start(proposedStates); IterableMapping.valid(proposedStates, i); i = IterableMapping.next(proposedStates, i)) {
-      uint256 key;
-      bool value;
-      (key, value) = IterableMapping.get(proposedStates, i);
-      result[index] = key;
-      index = index + 1;
-    }
-    return result;
   }
 }

@@ -9,7 +9,7 @@ import { System } from "./System.sol";
 import { ECVerify } from "./ECVerify.sol";
 import { ValidatorSet } from "./ValidatorSet.sol";
 
-contract BorValidatorSet is System, ValidatorSet {
+contract BorValidatorSet is System {
   using SafeMath for uint256;
   using RLPReader for bytes;
   using RLPReader for RLPReader.RLPItem;
@@ -20,19 +20,14 @@ contract BorValidatorSet is System, ValidatorSet {
   bytes32 public constant BOR_ID = keccak256("{{borChainId}}");
   uint8 public constant VOTE_TYPE = 2;
   uint256 public constant FIRST_END_BLOCK = {{firstEndBlock}};
+  uint256 public constant SPRINT = 64;
 
-  // sprint
-  uint256 public sprint;
-
-  // pending span proposal
-  bool private _isSpanProposalPending;
-  
   struct Validator {
     uint256 id;
     uint256 power;
     address signer;
   }
-  
+
   // span details
   struct Span {
     uint256 number;
@@ -42,10 +37,10 @@ contract BorValidatorSet is System, ValidatorSet {
 
   mapping(uint256 => Validator[]) public validators;
   mapping(uint256 => Validator[]) public producers;
-  
+
   mapping (uint256 => Span) public spans; // span number => span
   uint256[] public spanNumbers; // recent span numbers
-  
+
   // event
   event NewSpan(uint256 indexed id, uint256 indexed startBlock, uint256 indexed endBlock);
 
@@ -56,16 +51,14 @@ contract BorValidatorSet is System, ValidatorSet {
     require(isValidator(span, msg.sender));
     _;
   }
-  
-  function setInitialValidators() internal {
-    sprint = 64;
 
+  function setInitialValidators() internal {
     address[] memory d;
     uint256[] memory p;
 
     // get initial validators
     (d, p) = getInitialValidators();
-    
+
     // initial span
     uint256 span = 0;
     spans[span] = Span({
@@ -76,7 +69,7 @@ contract BorValidatorSet is System, ValidatorSet {
     spanNumbers.push(span);
     validators[span].length = 0;
     producers[span].length = 0;
-    
+
     for (uint256 i = 0; i < d.length; i++) {
       validators[span].length++;
       validators[span][i] = Validator({
@@ -85,7 +78,7 @@ contract BorValidatorSet is System, ValidatorSet {
         signer: d[i]
       });
     }
-    
+
     for (uint256 i = 0; i < d.length; i++) {
       producers[span].length++;
       producers[span][i] = Validator({
@@ -97,9 +90,9 @@ contract BorValidatorSet is System, ValidatorSet {
   }
 
   function currentSprint() public view returns (uint256) {
-    return block.number / 64;
+    return block.number / SPRINT;
   }
-  
+
   function getSpan(uint256 span) public view returns (uint256 number, uint256 startBlock, uint256 endBlock) {
     return (spans[span].number, spans[span].startBlock, spans[span].endBlock);
   }
@@ -113,11 +106,11 @@ contract BorValidatorSet is System, ValidatorSet {
     uint256 span = currentSpanNumber().add(1);
     return (spans[span].number, spans[span].startBlock, spans[span].endBlock);
   }
-  
+
   function getValidatorsBySpan(uint256 span) internal view returns (Validator[] memory) {
     return validators[span];
   }
-  
+
   function getProducersBySpan(uint256 span) internal view returns (Validator[] memory) {
     return producers[span];
   }
@@ -139,11 +132,11 @@ contract BorValidatorSet is System, ValidatorSet {
     // return default if not found any thing
     return 0;
   }
-  
+
   function currentSpanNumber() public view returns (uint256) {
     return getSpanByBlock(block.number);
   }
-  
+
   function getValidatorsTotalStakeBySpan(uint256 span) public view returns (uint256) {
     Validator[] memory vals = validators[span];
     uint256 result = 0;
@@ -152,7 +145,7 @@ contract BorValidatorSet is System, ValidatorSet {
     }
     return result;
   }
-  
+
   function getProducersTotalStakeBySpan(uint256 span) public view returns (uint256) {
     Validator[] memory vals = producers[span];
     uint256 result = 0;
@@ -161,7 +154,7 @@ contract BorValidatorSet is System, ValidatorSet {
     }
     return result;
   }
-  
+
   function getValidatorBySigner(uint256 span, address signer) public view returns (Validator memory result) {
     Validator[] memory vals = validators[span];
     for (uint256 i = 0; i < vals.length; i++) {
@@ -171,7 +164,7 @@ contract BorValidatorSet is System, ValidatorSet {
       }
     }
   }
-  
+
   function isValidator(uint256 span, address signer) public view returns (bool) {
     Validator[] memory vals = validators[span];
     for (uint256 i = 0; i < vals.length; i++) {
@@ -233,47 +226,9 @@ contract BorValidatorSet is System, ValidatorSet {
     return getBorValidators(block.number);
   }
 
-  // send transaction
-  function validateValidatorSet(
-    bytes memory vote,
-    bytes memory sigs,
-    bytes memory txBytes,
-    bytes memory proof
-  ) public {
-    // vote
-    RLPReader.RLPItem[] memory dataList = vote.toRlpItem().toList();
-
-    // check chain id and vote type
-    require(keccak256(dataList[0].toBytes()) == CHAIN, "Chain ID is invalid");
-    require(dataList[1].toUint() == VOTE_TYPE, "Vote type is invalid");
-
-    // validate hash of txBytes was signed as part of the vote
-    require(checkMembership(bytes32(dataList[4].toUint()), sha256(txBytes), proof), "Transaction is invalid");
-
-    // get span
-    uint256 span = currentSpanNumber();
-
-    // check sigs
-    uint256 stakedPower = getStakePowerBySigs(span, keccak256(vote), sigs);
-    require(stakedPower >= getValidatorsTotalStakeBySpan(span).mul(2).div(3).add(1), "Not enought power to change the span");
-  }
-
-  function proposeSpan() external onlyValidator {
-    require(_isSpanProposalPending == false);
-    _isSpanProposalPending = true;
-  }
-
-  // Pending span proposal
-	function spanProposalPending() 
-		public
-		view
-		returns (bool) {
-    return _isSpanProposalPending;
-  }
-
   function commitSpan(
     uint256 newSpan,
-    uint256 startBlock, 
+    uint256 startBlock,
     uint256 endBlock,
     bytes calldata validatorBytes,
     bytes calldata producerBytes
@@ -288,7 +243,7 @@ contract BorValidatorSet is System, ValidatorSet {
     // check conditions
     require(newSpan == span.add(1), "Invalid span id");
     require(endBlock > startBlock, "End block must be greater than start block");
-    require((endBlock - startBlock + 1) % sprint == 0, "Difference between start and end block must be in multiples of sprint");
+    require((endBlock - startBlock + 1) % SPRINT == 0, "Difference between start and end block must be in multiples of sprint");
     require(spans[span].startBlock <= startBlock, "Start block must be greater than current span");
 
     // check if already in the span
@@ -327,16 +282,13 @@ contract BorValidatorSet is System, ValidatorSet {
           signer: v[2].toAddress()
         });
     }
-
-    // clear pending span proposal
-    _isSpanProposalPending = false;
   }
 
   // Get stake power by sigs and data hash
   function getStakePowerBySigs(uint256 span, bytes32 dataHash, bytes memory sigs) public view returns (uint256) {
     uint256 stakePower = 0;
     address lastAdd = address(0x0); // cannot have address(0x0) as an owner
-    
+
     for (uint64 i = 0; i < sigs.length; i += 65) {
       bytes memory sigElement = BytesLib.slice(sigs, i, 65);
       address signer = dataHash.ecrecovery(sigElement);
@@ -348,14 +300,14 @@ contract BorValidatorSet is System, ValidatorSet {
         stakePower = stakePower.add(validator.power);
       }
     }
-    
+
     return stakePower;
   }
 
   //
   // Utility functions
   //
-  
+
   function checkMembership(
     bytes32 rootHash,
     bytes32 leaf,
@@ -378,7 +330,7 @@ contract BorValidatorSet is System, ValidatorSet {
         tempBytes := mload(add(proof, sub(i, 1)))
         proofElement := mload(add(proof, i))
       }
-      
+
       direction = tempBytes[0];
       if (direction == 0) {
         computedHash = innerNode(proofElement, computedHash);
@@ -386,14 +338,14 @@ contract BorValidatorSet is System, ValidatorSet {
         computedHash = innerNode(computedHash, proofElement);
       }
     }
-    
+
     return computedHash == rootHash;
   }
-  
+
   function leafNode(bytes32 d) public pure returns (bytes32) {
     return sha256(abi.encodePacked(byte(uint8(0)), d));
   }
-  
+
   function innerNode(bytes32 left, bytes32 right) public pure returns (bytes32) {
     return sha256(abi.encodePacked(byte(uint8(1)), left, right));
   }
