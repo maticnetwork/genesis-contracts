@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - develop
+      - master
+  pull_request:
+    branches: 
+      - develop
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup Node.js environment
+      uses: actions/setup-node@v1.4.2
+    - name: Generate genesis file
+      run: bash generate.sh 15001 heimdall-15001
+    - name: Process templates
+      run: npm run template:process
+    - name: Run tests
+      run: npm run test:ci
