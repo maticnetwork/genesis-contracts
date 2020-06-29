@@ -15,11 +15,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - name: Update Path
+      run: echo "::add-path::$RUNNER_WORKSPACE/$(basename $GITHUB_REPOSITORY)" # Make it accessible from runner
+    - name: Install solc
+      run: |
+        set -x
+        wget -c https://github.com/ethereum/solidity/releases/download/v0.5.3/solc-static-linux
+        mv solc-static-linux solc
+        chmod +x solc
+        solc --version
     - name: Setup Node.js environment
       uses: actions/setup-node@v1.4.2
     - name: Generate genesis file
       run: bash generate.sh 15001 heimdall-15001
-    - name: Process templates
-      run: npm run template:process
     - name: Run tests
       run: npm run test:ci
