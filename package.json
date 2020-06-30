@@ -10,7 +10,7 @@
     "truffle:compile": "truffle compile",
     "truffle:migrate": "truffle migrate",
     "test": "truffle test",
-    "test:ci": "scripts/run-test.sh",
+    "test:ci": "bash scripts/run-test.sh",
     "lint": "npm run lint:sol && npm run lint:js",
     "lint:js": "eslint test/**/*.js",
     "lint:sol:fix": "solium -d contracts/ --fix",

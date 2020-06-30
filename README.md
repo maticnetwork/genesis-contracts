@@ -19,12 +19,7 @@ $ npm run truffle:compile
 $ cd ..
 ```
 
-### 3. Compile contracts
-```bash
-$ npm run truffle:compile
-```
-
-### 4. Generate genesis file
+### 3. Generate Bor validator set sol file
 
 Following command will generate `BorValidatorSet.sol` file from `BorValidatorSet.template` file.
 
@@ -34,6 +29,13 @@ Following command will generate `BorValidatorSet.sol` file from `BorValidatorSet
 $ node generate-borvalidatorset.js --bor-chain-id <bor-chain-id> --heimdall-chain-id <heimdall-chain-id>
 ```
 
+### 4. Compile contracts
+```bash
+$ npm run truffle:compile
+```
+
+### 5. Generate genesis file
+
 Following command will generate `genesis.json` file from `genesis-template.json` file.
 
 ```bash
@@ -41,7 +43,7 @@ Following command will generate `genesis.json` file from `genesis-template.json`
 $ node generate-genesis.js --bor-chain-id <bor-chain-id> --heimdall-chain-id <heimdall-chain-id>
 ```
 
-### 5. Run Tests
+### 6. Run Tests
 ```bash
 $ npm run testrpc
 $ npm test
