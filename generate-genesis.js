@@ -43,12 +43,13 @@ function compileContract(key, contractFile, contractName) {
     })
 
     ls.stderr.on("data", data => {
-      // console.log(`stderr: ${data}`)
+      result.push(data.toString())
     })
 
     ls.on("close", code => {
       console.log(`child process exited with code ${code}`)
-      resolve(result.join(""))
+      const fn = code === 0 ? resolve : reject
+      fn(result.join(""))
     })
   }).then(compiledData => {
     compiledData = compiledData.replace(
@@ -103,4 +104,7 @@ Promise.all([
   const templateString = fs.readFileSync(program.template).toString()
   const resultString = nunjucks.renderString(templateString, data)
   fs.writeFileSync(program.output, resultString)
+}).catch(err => {
+  console.log(err)
+  process.exit(1)
 })
