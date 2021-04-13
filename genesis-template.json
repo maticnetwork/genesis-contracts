@@ -11,6 +11,7 @@
     "petersburgBlock": 0,
     "istanbulBlock": 0,
     "muirGlacierBlock": 0,
+    "berlinBlock": 0,
     "bor": {
       "period": 1,
       "producerDelay": 4,
