@@ -11,10 +11,10 @@
     "petersburgBlock": 0,
     "istanbulBlock": 0,
     "muirGlacierBlock": 0,
-    "berlinBlock": 13996000,
-    "londonBlock": 22640000,
+    "berlinBlock": 0,
+    "londonBlock": 0,
     "bor": {
-      "jaipurBlock": 22770000,
+      "jaipurBlock": 0,
       "period": {
         "0": 1
       },
@@ -26,7 +26,7 @@
       "validatorContract": "0x0000000000000000000000000000000000001000",
       "stateReceiverContract": "0x0000000000000000000000000000000000001001",
       "burntContract": {
-        "22640000": "0x70bcA57F4579f58670aB2d18Ef16e02C17553C38"
+        "0": "0x000000000000000000000000000000000000dead"
       }
     }
   },
