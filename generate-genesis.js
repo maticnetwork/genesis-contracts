@@ -80,7 +80,7 @@ Promise.all([
     "MRC20"
   )
 ]).then(result => {
-  const totalMaticSupply = web3.utils.toBN("10000000000")
+  const totalBoneSupply = web3.utils.toBN("250000000")
 
   var validatorsBalance = web3.utils.toBN(0)
   validators.forEach(v => {
@@ -88,7 +88,7 @@ Promise.all([
     v.balance = web3.utils.toHex(web3.utils.toWei(String(v.balance)))
   })
 
-  const contractBalance = totalMaticSupply.sub(validatorsBalance)
+  const contractBalance = totalBoneSupply.sub(validatorsBalance)
   const data = {
     chainId: program.borChainId,
     validators: validators,
