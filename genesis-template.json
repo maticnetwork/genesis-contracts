@@ -15,14 +15,10 @@
     "londonBlock": 0,
     "bor": {
       "jaipurBlock": 0,
-      "period": {
-        "0": 1
-      },
+      "period": 1,
       "producerDelay": 6,
       "sprint": 64,
-      "backupMultiplier": {
-        "0": 1
-      },
+      "backupMultiplier": 1,
       "validatorContract": "0x0000000000000000000000000000000000001000",
       "stateReceiverContract": "0x0000000000000000000000000000000000001001",
       "burntContract": {
