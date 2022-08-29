@@ -23,11 +23,11 @@
     "chai": "4.2.0",
     "chai-as-promised": "^7.1.1",
     "commander": "^3.0.1",
+    "ganache-cli": "^6.8.0-istanbul.0",
     "nunjucks": "^3.2.0",
     "openzeppelin-solidity": "2.2.0",
     "solidity-rlp": "^2.0.0",
     "truffle": "^5.0.34",
-    "web3": "^1.2.4",
-    "ganache-cli": "^6.8.0-istanbul.0"
+    "web3": "^1.2.4"
   }
 }

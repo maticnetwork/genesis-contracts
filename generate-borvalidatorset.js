@@ -11,6 +11,7 @@ program.option(
   "Heimdall chain id",
   "heimdall-P5rXwg"
 )
+program.option("--sprint-size <sprint-size>", "Sprint size", "64")
 program.option(
   "--first-end-block <first-end-block>",
   "End block for first span",
@@ -37,7 +38,8 @@ const data = {
   borChainId: program.borChainId,
   heimdallChainId: program.heimdallChainId,
   firstEndBlock: program.firstEndBlock,
-  validators: validators
+  validators: validators,
+  sprintSize: program.sprintSize
 }
 const templateString = fs.readFileSync(program.template).toString()
 const resultString = nunjucks.renderString(templateString, data)
