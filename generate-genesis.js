@@ -5,6 +5,7 @@ const fs = require("fs")
 const web3 = require("web3")
 
 const validators = require("./validators")
+const blocks = require("./blocks");
 
 // load and execute bor validator set
 require("./generate-borvalidatorset")
@@ -96,7 +97,8 @@ Promise.all([
     maticChildERC20ContractBalance: web3.utils.toHex(
       web3.utils.toWei(contractBalance.toString())
     ),
-    sprintSize: program.sprintSize
+    sprintSize: program.sprintSize,
+    blocks: blocks
   }
 
   result.forEach(r => {

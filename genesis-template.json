@@ -16,12 +16,16 @@
     "bor": {
       "jaipurBlock": 0,
       "period": {
-        "0": 1
+        {% for block in blocks %}{% if block === blocks[blocks.length -1] %}"{{block.number}}": {{block.time}}
+        {% else %}"{{block.number}}": {{block.time}},{% endif %}
+        {% endfor %}
       },
       "producerDelay": 6,
       "sprint": {{sprintSize}},
       "backupMultiplier": {
-        "0": 1
+        {% for block in blocks %}{% if block === blocks[blocks.length -1] %}"{{block.number}}": {{block.time}}
+        {% else %}"{{block.number}}": {{block.time}},{% endif %}
+        {% endfor %}
       },
       "validatorContract": "0x0000000000000000000000000000000000001000",
       "stateReceiverContract": "0x0000000000000000000000000000000000001001",
