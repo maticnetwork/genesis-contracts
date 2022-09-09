@@ -27,7 +27,7 @@
     "openzeppelin-solidity": "2.2.0",
     "solidity-rlp": "^2.0.0",
     "truffle": "^5.0.34",
-    "web3": "^1.2.4",
+    "web3": "^1.2.7",
     "ganache-cli": "^6.8.0-istanbul.0"
   }
 }
