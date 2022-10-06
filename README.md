@@ -34,7 +34,11 @@ $ node generate-borvalidatorset.js --bor-chain-id <bor-chain-id> --heimdall-chai
 $ npm run truffle:compile
 ```
 
-### 5. Generate genesis file
+### 5. Configure Block times
+
+To add custom block time and associated block no.s in genesis, edit the `blocks.js` file
+
+### 6. Generate genesis file
 
 Following command will generate `genesis.json` file from `genesis-template.json` file.
 
@@ -43,7 +47,7 @@ Following command will generate `genesis.json` file from `genesis-template.json`
 $ node generate-genesis.js --bor-chain-id <bor-chain-id> --heimdall-chain-id <heimdall-chain-id>
 ```
 
-### 6. Run Tests
+### 7. Run Tests
 ```bash
 $ npm run testrpc
 $ npm test
