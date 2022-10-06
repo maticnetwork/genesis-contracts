@@ -16,7 +16,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Update Path
-      run: echo "::add-path::$RUNNER_WORKSPACE/$(basename $GITHUB_REPOSITORY)" # Make it accessible from runner
+      run: echo "$RUNNER_WORKSPACE/$(basename $GITHUB_REPOSITORY)" >> $GITHUB_PATH # Make it accessible from runner
     - name: Install solc
       run: |
         set -x
@@ -25,7 +25,7 @@ jobs:
         chmod +x solc
         solc --version
     - name: Setup Node.js environment
-      uses: actions/setup-node@v1.4.2
+      uses: actions/setup-node@v1.4.4
     - name: Generate genesis file
       run: bash generate.sh 15001 heimdall-15001
     - name: Run tests
