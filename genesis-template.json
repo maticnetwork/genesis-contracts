@@ -20,7 +20,7 @@
         {% else %}"{{block.number}}": {{block.time}},{% endif %}
         {% endfor %}
       },
-      "producerDelay": 6,
+      "producerDelay": {% for block in blocks| sort(false, false) %}{% endfor %}{{blocks[blocks.length -1].time}},
       "sprint": {{sprintSize}},
       "backupMultiplier": {
         {% for block in blocks %}{% if block === blocks[blocks.length -1] %}"{{block.number}}": {{block.time}}
