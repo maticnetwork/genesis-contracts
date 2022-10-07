@@ -10,9 +10,9 @@ $ git submodule init
 $ git submodule update
 ```
 
-### 2. Compile Matic contracts
+### 2. Compile Shibarium contracts
 ```bash
-$ cd matic-contracts
+$ cd shibarium-contracts
 $ npm install
 $ node scripts/process-templates.js --bor-chain-id <bor-chain-id>
 $ npm run truffle:compile
