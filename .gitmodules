@@ -1,4 +1,3 @@
 [submodule "matic-contracts"]
 	path = matic-contracts
 	url = https://github.com/maticnetwork/contracts.git
-	branch = master
