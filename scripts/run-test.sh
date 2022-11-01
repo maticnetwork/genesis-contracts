@@ -11,7 +11,7 @@ PWD=$(pwd)
 
 cleanup() {
   echo "Cleaning up"
-  pkill -f ganache
+  pkill -f ganache-cli
   echo "Done"
 }
 
