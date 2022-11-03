@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "testrpc": "ganache-cli -p 8545 --mnemonic 'clock radar mass judge dismiss just intact mind resemble fringe diary casino' --gasLimit 13000000",
+    "testrpc": "ganache --chain.hardfork istanbul --chain.networkId 15001 --wallet.mnemonic 'clock radar mass judge dismiss just intact mind resemble fringe diary casino' -p 8545 --miner.blockGasLimit 13000000 --miner.defaultGasPrice 0 --chain.allowUnlimitedContractSize",
     "truffle": "truffle",
     "truffle:test": "truffle test",
     "truffle:compile": "truffle compile",
