@@ -5,3 +5,5 @@ contracts/BorValidatorSet.sol
 pids
 logs
 genesis.json
+
+.idea
