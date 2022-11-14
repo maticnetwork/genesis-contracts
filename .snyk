@@ -103,3 +103,7 @@ ignore:
         reason: 'As open source org, we have no issues with licenses'
         created: 2022-11-14T15:20:13.000Z
 patch: {}
+exclude:
+  global: # foollowing are used for tests, therefore private keys are mocked
+    - matic-contracts/scripts/*.js
+    - matic-contracts/moonwalker-migrations/*.js

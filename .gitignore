@@ -7,3 +7,5 @@ logs
 genesis.json
 
 .idea
+
+.dccache
