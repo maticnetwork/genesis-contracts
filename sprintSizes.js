@@ -1,4 +1,4 @@
-const blocks = [
+const sprintSizes = [
     {
         number: "0",
         sprintSize: "2"
