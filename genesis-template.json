@@ -22,7 +22,7 @@
         {% endfor %}
       },
       "producerDelay": {
-	      "0": 2
+	      "0": 5
       },
       "sprint": {
 	      "0": 64
