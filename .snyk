@@ -122,18 +122,6 @@ ignore:
     - '*':
         reason: 'Waiting for issue to be fixed. See https://github.com/trufflesuite/truffle/issues/5704'
         created: 2022-11-15T09:17:00.000Z
-  'SNYK-JS-ANSIREGEX-1583908':
-    - '*':
-        reason: 'Waiting for issue to be fixed. See https://github.com/trufflesuite/ganache/issues/3915'
-        created: 2022-11-15T09:17:00.000Z
-  'SNYK-JS-ELLIPTIC-1064899':
-    - '*':
-        reason: 'Waiting for issue to be fixed. See https://github.com/trufflesuite/ganache/issues/3915'
-        created: 2022-11-15T09:17:00.000Z
-  'SNYK-JS-Y18N-1021887':
-    - '*':
-        reason: 'Waiting for issue to be fixed. See https://github.com/trufflesuite/ganache/issues/3915'
-        created: 2022-11-15T09:17:00.000Z
 patch: {}
 exclude:
   global: # foollowing are used for tests, therefore private keys are mocked
