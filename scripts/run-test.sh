@@ -10,9 +10,11 @@ trap cleanup EXIT
 PWD=$(pwd)
 
 cleanup() {
-  echo "Cleaning up"
-  pkill ganache-cli
-  echo "Done"
+  if [ "$GH_ACTIONS" != true ] ; then
+    echo "Cleaning up"
+    pkill -f ganache-cli
+    echo "Done"
+  fi
 }
 
 start_testrpc() {
