@@ -32,4 +32,4 @@ jobs:
     - name: Generate genesis file
       run: bash generate.sh 15001 heimdall-15001
     - name: Run tests
-      run: GH_ACTIONS=true npm run test:ci
+      run: npm run test:ci

@@ -10,7 +10,7 @@ trap cleanup EXIT
 PWD=$(pwd)
 
 cleanup() {
-  if [ "$GH_ACTIONS" != true ] ; then
+  if [ "$GITHUB_ACTIONS" != true ] ; then
     echo "Cleaning up"
     pkill -f ganache-cli
     echo "Done"
