@@ -15,13 +15,18 @@
     "londonBlock": 0,
     "bor": {
       "jaipurBlock": 0,
+      "delhiBlock": 0,
       "period": {
         {% for block in blocks %}{% if block === blocks[blocks.length -1] %}"{{block.number}}": {{block.time}}
         {% else %}"{{block.number}}": {{block.time}},{% endif %}
         {% endfor %}
       },
-      "producerDelay": {% for block in blocks| sort(false, false) %}{% endfor %}{{blocks[blocks.length -1].time}},
-      "sprint": {{sprintSize}},
+      "producerDelay": {
+	      "0": 5
+      },
+      "sprint": {
+	      "0": 64
+      },
       "backupMultiplier": {
         {% for block in blocks %}{% if block === blocks[blocks.length -1] %}"{{block.number}}": {{block.time}}
         {% else %}"{{block.number}}": {{block.time}},{% endif %}
