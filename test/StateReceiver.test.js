@@ -10,7 +10,7 @@ contract('StateReceiver', async (accounts) => {
 
         before(async function () {
             testStateReceiver = await TestStateReceiver.deployed()
-            testStateReceiver.setSystemAddress(accounts[0])
+            await testStateReceiver.setSystemAddress(accounts[0])
             testCommitState = await TestCommitState.deployed()
             testCommitStateAddr = testCommitState.address
         })

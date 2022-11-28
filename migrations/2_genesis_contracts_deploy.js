@@ -39,20 +39,18 @@ const libDeps = [
 module.exports = async function (deployer, network) {
     deployer.then(async () => {
         console.log('linking libs...')
-        await bluebird.map(libDeps, async e => {
+        for (let e of libDeps) {
             await deployer.deploy(e.lib)
             deployer.link(e.lib, e.contracts)
-        })
+        }
 
         console.log("Deploying contracts...")
-        await Promise.all([
-            deployer.deploy(BorValidatorSet),
-            deployer.deploy(TestBorValidatorSet),
-            deployer.deploy(StateReciever),
-            deployer.deploy(TestStateReceiver),
-            deployer.deploy(System),
-            deployer.deploy(ValidatorVerifier),
-            deployer.deploy(TestCommitState)
-        ])
+        await deployer.deploy(BorValidatorSet)
+        await deployer.deploy(TestBorValidatorSet)
+        await deployer.deploy(StateReciever)
+        await deployer.deploy(TestStateReceiver)
+        await deployer.deploy(System)
+        await deployer.deploy(ValidatorVerifier)
+        await deployer.deploy(TestCommitState)
     })
 }
