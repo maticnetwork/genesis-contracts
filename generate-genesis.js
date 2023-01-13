@@ -6,13 +6,13 @@ const web3 = require("web3")
 
 const validators = require("./validators")
 const blocks = require("./blocks");
+const sprintSizes = require("./sprintSizes");
 
 // load and execute bor validator set
 require("./generate-borvalidatorset")
 
 program.version("0.0.1")
 program.option("-c, --bor-chain-id <bor-chain-id>", "Bor chain id", "15001")
-program.option("-s, --sprint-size <sprint-size>", "Sprint size", "64")
 program.option(
   "-o, --output <output-file>",
   "Genesis json file",
@@ -97,8 +97,8 @@ Promise.all([
     maticChildERC20ContractBalance: web3.utils.toHex(
       web3.utils.toWei(contractBalance.toString())
     ),
-    sprintSize: program.sprintSize,
-    blocks: blocks
+    blocks: blocks,
+    sprintSizes: sprintSizes
   }
 
   result.forEach(r => {
