@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "testrpc": "ganache-cli -p 8545 --networkId 15001 --mnemonic 'clock radar mass judge dismiss just intact mind resemble fringe diary casino' --gasLimit 13000000",
+    "testrpc": "ganache --chain.hardfork istanbul --chain.networkId 15001 --wallet.mnemonic 'clock radar mass judge dismiss just intact mind resemble fringe diary casino' -p 8545 --miner.blockGasLimit 13000000 --miner.defaultGasPrice 0 --chain.allowUnlimitedContractSize",
     "truffle": "truffle",
     "truffle:test": "truffle test",
     "truffle:compile": "truffle compile",
@@ -23,11 +23,12 @@
     "chai": "4.2.0",
     "chai-as-promised": "^7.1.1",
     "commander": "^3.0.1",
-    "ganache-cli": "^6.8.0-istanbul.0",
+    "ganache": "^7.5.0",
+    "ganache-cli": "^6.12.2",
     "nunjucks": "^3.2.0",
     "openzeppelin-solidity": "2.2.0",
     "solidity-rlp": "^2.0.0",
-    "truffle": "^5.0.34",
-    "web3": "^1.2.4"
+    "truffle": "^5.6.3",
+    "web3": "1.7.4"
   }
 }

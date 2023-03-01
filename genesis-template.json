@@ -20,8 +20,16 @@
         {% else %}"{{block.number}}": {{block.time}},{% endif %}
         {% endfor %}
       },
-      "producerDelay": {% for block in blocks| sort(false, false) %}{% endfor %}{{blocks[blocks.length -1].time}},
-      "sprint": {{sprintSize}},
+      "producerDelay": {
+        {% for block in blocks %}{% if block === blocks[blocks.length -1] %}"{{block.number}}": {{block.time}}
+        {% else %}"{{block.number}}": {{block.time}},{% endif %}
+        {% endfor %}
+      },
+      "sprint": {
+        {% for sprintSize in sprintSizes %}{% if sprintSize === sprintSizes[sprintSizes.length -1] %}"{{sprintSize.number}}": {{sprintSize.sprintSize}}
+        {% else %}"{{sprintSize.number}}": {{sprintSize.sprintSize}},{% endif %}
+        {% endfor %}
+      },
       "backupMultiplier": {
         {% for block in blocks %}{% if block === blocks[blocks.length -1] %}"{{block.number}}": {{block.time}}
         {% else %}"{{block.number}}": {{block.time}},{% endif %}
