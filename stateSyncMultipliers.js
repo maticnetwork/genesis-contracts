@@ -4,8 +4,8 @@ const stateSyncMultipliers = [
         stateSyncMultiplier: "1"
     },
     {
-        number: "10",
-        stateSyncMultiplier: "8"
+        number: "256",
+        stateSyncMultiplier: "2"
     }
 ]
 
