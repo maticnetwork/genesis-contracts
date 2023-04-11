@@ -7,6 +7,7 @@ const web3 = require("web3")
 const validators = require("./validators")
 const blocks = require("./blocks");
 const sprintSizes = require("./sprintSizes");
+const stateSyncMultipliers = require("./stateSyncMultipliers");
 
 // load and execute bor validator set
 require("./generate-borvalidatorset")
@@ -98,7 +99,8 @@ Promise.all([
       web3.utils.toWei(contractBalance.toString())
     ),
     blocks: blocks,
-    sprintSizes: sprintSizes
+    sprintSizes: sprintSizes,
+    stateSyncMultipliers: stateSyncMultipliers
   }
 
   result.forEach(r => {

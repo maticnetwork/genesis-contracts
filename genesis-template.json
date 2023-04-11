@@ -30,6 +30,11 @@
         {% else %}"{{sprintSize.number}}": {{sprintSize.sprintSize}},{% endif %}
         {% endfor %}
       },
+      "stateSyncConfirmationMultiplier": {
+        {% for stateSyncMultiplier in stateSyncMultipliers %}{% if stateSyncMultiplier === stateSyncMultipliers[stateSyncMultipliers.length -1] %}"{{stateSyncMultiplier.number}}": {{stateSyncMultiplier.stateSyncMultiplier}}
+        {% else %}"{{stateSyncMultiplier.number}}": {{stateSyncMultiplier.stateSyncMultiplier}},{% endif %}
+        {% endfor %}
+      },
       "backupMultiplier": {
         {% for block in blocks %}{% if block === blocks[blocks.length -1] %}"{{block.number}}": {{block.time}}
         {% else %}"{{block.number}}": {{block.time}},{% endif %}
