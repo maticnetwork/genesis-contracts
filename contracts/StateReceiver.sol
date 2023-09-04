@@ -10,6 +10,7 @@ contract StateReceiver is System {
   using RLPReader for RLPReader.RLPItem;
 
   uint256 public lastStateId;
+  event StateCommitted(uint256 indexed _stateId, bool _success);
 
   function commitState(uint256 syncTime, bytes calldata recordBytes) onlySystem external returns(bool success) {
     // parse state data
@@ -32,6 +33,7 @@ contract StateReceiver is System {
         success := call(txGas, receiver, 0, add(data, 0x20), mload(data), 0, 0)
       }
     }
+    emit StateCommitted(stateId, success);
   }
 
   // check if address is contract
