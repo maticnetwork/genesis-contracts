@@ -39,7 +39,13 @@ contract('StateReceiver', async (accounts) => {
             const data = await testCommitState.data()
             assertBigNumberEquality(id, new BN(stateID))
             assert.strictEqual(data, stateData)
+
+            // check for the StateCommitted event
+            assert.strictEqual(result.logs[0].event, "StateCommitted")
+            assert.strictEqual(result.logs[0].args.stateId.toNumber(), stateID)
+            assert.strictEqual(result.logs[0].args.success, true)
         })
+
         it('commit the state #2 (stateID #2) and check id & data', async () => {
             const dummyAddr = "0x0000000000000000000000000000000000000001"
             const stateData = web3.eth.abi.encodeParameters(
@@ -56,6 +62,7 @@ contract('StateReceiver', async (accounts) => {
             assertBigNumberEquality(id, new BN(stateID))
             assert.strictEqual(data, stateData)
         })
+
         it('should revert (calling from a non-system address', async () => {
             const dummyAddr = "0x0000000000000000000000000000000000000001"
             const stateData = web3.eth.abi.encodeParameters(
@@ -76,13 +83,18 @@ contract('StateReceiver', async (accounts) => {
             const dummyAddr = "0x0000000000000000000000000000000000000001"
             const stateData = web3.eth.abi.encodeParameters(
                   ['address', 'address', 'uint256', 'uint256'],
-                  // num iterations = 10000, will make the onStateReceive call go out of gas but not revert
-                  [dummyAddr, accounts[0], 0, 10000])
+                  // num iterations = 100000, will make the onStateReceive call go out of gas but not revert
+                  [dummyAddr, accounts[0], 0, 100000])
             const stateID = 3
             let recordBytes = [stateID, testCommitStateAddr, stateData]
             recordBytes = ethUtils.bufferToHex(ethUtils.rlp.encode(recordBytes))
-            const result = await testStateReceiver.commitState.call(0,recordBytes)
-            assert.isFalse(result)
+            const result = await testStateReceiver.commitState(0,recordBytes)
+            assert.strictEqual(result.status, true)
+
+            // check for the StateCommitted event with success === false
+            assert.strictEqual(result.logs[0].event, "StateCommitted")
+            assert.strictEqual(result.logs[0].args.stateId.toNumber(), stateID)
+            assert.strictEqual(result.logs[0].args.success, false)
         })
     })
 })

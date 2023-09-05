@@ -76,8 +76,12 @@ module.exports = {
 
   // Set default mocha options here, use special reporters etc.
   mocha: {
-    // timeout: 100000
-  },
+		reporter: "eth-gas-reporter",
+		reporterOptions: {
+			src: "./contracts",
+			url: "http://localhost:8545",
+		},
+	},
 
   // Configure your compilers
   compilers: {

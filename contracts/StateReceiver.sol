@@ -3,7 +3,6 @@ pragma solidity ^0.5.11;
 import { RLPReader } from "solidity-rlp/contracts/RLPReader.sol";
 
 import { System } from "./System.sol";
-import { IStateReceiver } from "./IStateReceiver.sol";
 
 contract StateReceiver is System {
   using RLPReader for bytes;
@@ -11,7 +10,9 @@ contract StateReceiver is System {
 
   uint256 public lastStateId;
 
-  function commitState(uint256 syncTime, bytes calldata recordBytes) onlySystem external returns(bool success) {
+  event StateCommitted(uint256 indexed stateId, bool success);
+
+  function commitState(uint256 syncTime, bytes calldata recordBytes) external onlySystem returns(bool success) {
     // parse state data
     RLPReader.RLPItem[] memory dataList = recordBytes.toRlpItem().toList();
     uint256 stateId = dataList[0].toUint();
@@ -31,12 +32,14 @@ contract StateReceiver is System {
       assembly {
         success := call(txGas, receiver, 0, add(data, 0x20), mload(data), 0, 0)
       }
+      emit StateCommitted(stateId, success);
     }
   }
 
   // check if address is contract
   function isContract(address _addr) private view returns (bool){
     uint32 size;
+    // solium-disable-next-line security/no-inline-assembly
     assembly {
       size := extcodesize(_addr)
     }
