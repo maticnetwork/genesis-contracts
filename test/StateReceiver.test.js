@@ -80,16 +80,15 @@ contract('StateReceiver', async (accounts) => {
                 }
         })
         it('Infinite loop: ', async () => {
-            const dummyAddr = "0x0000000000000000000000000000000000000001"
             const stateData = web3.eth.abi.encodeParameters(
                   ['address', 'address', 'uint256', 'uint256'],
-                  // num iterations = 100000, will make the onStateReceive call go out of gas but not revert
-                  [dummyAddr, accounts[0], 0, 100000])
+                  // num iterations = 10000, will make the onStateReceive call go out of gas but not revert
+                  [testCommitStateAddr, accounts[0], 0, 10000])
             const stateID = 3
             let recordBytes = [stateID, testCommitStateAddr, stateData]
             recordBytes = ethUtils.bufferToHex(ethUtils.rlp.encode(recordBytes))
             const result = await testStateReceiver.commitState(0,recordBytes)
-            assert.strictEqual(result.status, true)
+            assert.strictEqual(result.receipt.status, true)
 
             // check for the StateCommitted event with success === false
             assert.strictEqual(result.logs[0].event, "StateCommitted")
