@@ -1,11 +1,7 @@
 const sprintSizes = [
     {
         number: "0",
-        sprintSize: "2"
-    },
-    {
-        number: "10",
-        sprintSize: "5"
+        sprintSize: "16"
     }
 ]
 
