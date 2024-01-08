@@ -18,6 +18,9 @@
       "jaipurBlock": 0,
       "delhiBlock": 0,
       "indoreBlock": 0,
+      "stateSyncConfirmationDelay": {
+        "0": 128
+      },
       "period": {
         {% for block in blocks %}{% if block === blocks[blocks.length -1] %}"{{block.number}}": {{block.time}}
         {% else %}"{{block.number}}": {{block.time}},{% endif %}
