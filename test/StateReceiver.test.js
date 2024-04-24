@@ -181,8 +181,8 @@ contract('StateReceiver', async accounts => {
         assert.fail('reverting receiver was able replay')
       } catch (err) {
         assert(
-          err.message.search('!replay') >= 0,
-          "Expected '!replay', got" + err + "' instead"
+          err.message.search('TestRevertingReceiver') >= 0,
+          "Expected 'TestRevertingReceiver', got" + err + "' instead"
         )
       }
     })
@@ -261,8 +261,8 @@ contract('StateReceiver', async accounts => {
         assert.fail('was able to replay again')
       } catch (err) {
         assert(
-          err.message.search('!replay') >= 0,
-          "Expected '!replay', got" + err + "' instead"
+          err.message.search('!found') >= 0,
+          "Expected '!found', got" + err + "' instead"
         )
       }
     })

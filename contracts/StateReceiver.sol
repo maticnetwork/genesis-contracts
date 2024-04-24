@@ -4,6 +4,10 @@ import { RLPReader } from "solidity-rlp/contracts/RLPReader.sol";
 
 import { System } from "./System.sol";
 
+interface IStateReceiver {
+  function onStateReceive(uint256, bytes calldata) external;
+}
+
 contract StateReceiver is System {
   using RLPReader for bytes;
   using RLPReader for RLPReader.RLPItem;
@@ -30,6 +34,7 @@ contract StateReceiver is System {
     // notify state receiver contract, in a non-revert manner
     if (isContract(receiver)) {
       uint256 txGas = 5000000;
+
       bytes memory data = abi.encodeWithSignature("onStateReceive(uint256,bytes)", stateId, stateData);
       // solium-disable-next-line security/no-inline-assembly
       assembly {
@@ -47,14 +52,7 @@ contract StateReceiver is System {
     delete failedStateSyncs[stateId];
 
     (address receiver, bytes memory stateData) = abi.decode(stateSyncData, (address, bytes));
-    uint256 txGas = 5000000;
-    bytes memory data = abi.encodeWithSignature("onStateReceive(uint256,bytes)", stateId, stateData);
-    bool success;
-    // solium-disable-next-line security/no-inline-assembly
-    assembly {
-      success := call(txGas, receiver, 0, add(data, 0x20), mload(data), 0, 0)
-    }
-    require(success, "!replay");
+    IStateReceiver(receiver).onStateReceive(stateId, stateData);
     emit StateSyncReplay(stateId);
   }
 
