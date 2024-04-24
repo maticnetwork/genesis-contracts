@@ -27,7 +27,7 @@ contract StateReceiver is System {
 
     address receiver = dataList[1].toAddress();
     bytes memory stateData = dataList[2].toBytes();
-    // notify state receiver contract, in a non-revert manner(bool success
+    // notify state receiver contract, in a non-revert manner
     if (isContract(receiver)) {
       uint256 txGas = 5000000;
       bytes memory data = abi.encodeWithSignature("onStateReceive(uint256,bytes)", stateId, stateData);
