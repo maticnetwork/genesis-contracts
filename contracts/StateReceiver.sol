@@ -28,7 +28,6 @@ contract StateReceiver is System {
       "StateIds are not sequential"
     );
     lastStateId++;
-
     address receiver = dataList[1].toAddress();
     bytes memory stateData = dataList[2].toBytes();
     // notify state receiver contract, in a non-revert manner
@@ -47,12 +46,11 @@ contract StateReceiver is System {
 
   function replayFailedStateSync(uint256 stateId) external {
     bytes memory stateSyncData = failedStateSyncs[stateId]; // at 0x80, opt: can decode from memory
-
     require(stateSyncData.length != 0, "!found");
     delete failedStateSyncs[stateId];
 
     (address receiver, bytes memory stateData) = abi.decode(stateSyncData, (address, bytes));
-    IStateReceiver(receiver).onStateReceive(stateId, stateData);
+    IStateReceiver(receiver).onStateReceive(stateId, stateData); // revertable
     emit StateSyncReplay(stateId);
   }
 
