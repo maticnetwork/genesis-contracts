@@ -49,15 +49,12 @@ contract StateReceiver is System {
     (address receiver, bytes memory stateData) = abi.decode(stateSyncData, (address, bytes));
     uint256 txGas = 5000000;
     bytes memory data = abi.encodeWithSignature("onStateReceive(uint256,bytes)", stateId, stateData);
+    bool success;
     // solium-disable-next-line security/no-inline-assembly
     assembly {
-      let success := call(txGas, receiver, 0, add(data, 0x20), mload(data), 0, 0)
-      if iszero(success) {
-        let fmp := mload(0x40)
-        mstore(fmp, 0x742a8b91) // 'StateSyncFailed()'
-        revert(sub(fmp, 0x04), 0x04)
-      }
+      success := call(txGas, receiver, 0, add(data, 0x20), mload(data), 0, 0)
     }
+    require(success, "!replay");
     emit StateSyncReplay(stateId);
   }
 
