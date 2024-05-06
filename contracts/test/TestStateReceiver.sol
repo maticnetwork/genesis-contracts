@@ -4,4 +4,6 @@ pragma experimental ABIEncoderV2;
 import {StateReceiver} from "../StateReceiver.sol";
 import {TestSystem} from "./TestSystem.sol";
 
-contract TestStateReceiver is StateReceiver, TestSystem {}
+contract TestStateReceiver is StateReceiver, TestSystem {
+  constructor(address _rootSetter) public StateReceiver(_rootSetter) {}
+}

@@ -46,11 +46,13 @@ module.exports = async function (deployer, network) {
             deployer.link(e.lib, e.contracts)
         }
 
-        console.log("Deploying contracts...")
+        const rootSetter = deployer.networks[network].from
+
+        console.log("Deploying contracts with rootSetter %s...", rootSetter)
         await deployer.deploy(BorValidatorSet)
         await deployer.deploy(TestBorValidatorSet)
-        await deployer.deploy(StateReciever)
-        await deployer.deploy(TestStateReceiver)
+        await deployer.deploy(StateReciever, rootSetter)
+        await deployer.deploy(TestStateReceiver, rootSetter)
         await deployer.deploy(System)
         await deployer.deploy(ValidatorVerifier)
         await deployer.deploy(TestCommitState)
