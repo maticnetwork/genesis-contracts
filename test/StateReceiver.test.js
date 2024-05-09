@@ -344,7 +344,7 @@ contract('StateReceiver', async (accounts) => {
         '!zero'
       )
     })
-    it('should not replay zero hashes or invalid proof', async () => {
+    it('should not replay zero leaf or invalid proof', async () => {
       await expectRevert(
         testStateReceiver.replayHistoricFailedStateSync(
           randomProof(tree.height),
@@ -423,6 +423,7 @@ contract('StateReceiver', async (accounts) => {
         [stateId, receiver, stateData]
       ] of shuffledFailedStateSyncs) {
         const leaf = getLeaf(stateId, receiver, stateData)
+        assert.isFalse(await testStateReceiver.nullifier(leaf))
         const proof = tree.getProofTreeByValue(leaf)
         const res = await testStateReceiver.replayHistoricFailedStateSync(
           proof,
@@ -433,12 +434,10 @@ contract('StateReceiver', async (accounts) => {
         )
         assert.strictEqual(res.logs[0].event, 'StateSyncReplay')
         assert.strictEqual(res.logs[0].args.stateId.toNumber(), stateId)
-
         assert.strictEqual(
           (await testStateReceiver.replayCount()).toNumber(),
           ++replayed
         )
-
         assert.isTrue(await testStateReceiver.nullifier(leaf))
 
         await expectRevert(
@@ -470,6 +469,9 @@ contract('StateReceiver', async (accounts) => {
       const [stateId, receiver, stateData] = failedStateSyncs[idx]
       const leaf = getLeaf(stateId, receiver, stateData)
       const proof = tree.getProofTreeByValue(leaf)
+
+      assert.isFalse(await testStateReceiver.nullifier(leaf))
+
       const res = await testStateReceiver.replayHistoricFailedStateSync(
         proof,
         idx,
