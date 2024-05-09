@@ -1,13 +1,27 @@
 const { assert } = require('chai')
 const ethUtils = require('ethereumjs-util')
+const { keccak256, randomHex } = require('web3-utils')
 const TestStateReceiver = artifacts.require('TestStateReceiver')
 const TestCommitState = artifacts.require('TestCommitState')
 const TestReenterer = artifacts.require('TestReenterer')
 const TestRevertingReceiver = artifacts.require('TestRevertingReceiver')
+const SparseMerkleTree = require('./util/merkle')
+const { getLeaf, fetchFailedStateSyncs } = require('./util/fetchLeaf')
+const { expectRevert } = require('./util/assertions')
 
 const BN = ethUtils.BN
+const zeroAddress = '0x' + '0'.repeat(40)
+const zeroHash = '0x' + '0'.repeat(64)
+const zeroLeaf = getLeaf(0, zeroAddress, '0x')
+const randomAddress = () => web3.eth.accounts.create().address
+const randomInRange = (x, y = 0) => Math.floor(Math.random() * (x - y) + y)
+const randomBytes = () => randomHex(randomInRange(68))
+const randomProof = (height) =>
+  new Array(height).fill(0).map(() => randomHex(32))
 
-contract('StateReceiver', async accounts => {
+const FUZZ_WEIGHT = process.env.CI == 'true' ? 100 : 20
+
+contract('StateReceiver', async (accounts) => {
   describe('commitState()', async () => {
     let testStateReceiver
     let testCommitStateAddr
@@ -264,6 +278,261 @@ contract('StateReceiver', async accounts => {
           err.message.search('!found') >= 0,
           "Expected '!found', got" + err + "' instead"
         )
+      }
+    })
+  })
+
+  describe('replayHistoricFailedStateSync()', async () => {
+    let testStateReceiver
+    let testRevertingReceiver
+
+    let fromBlock, toBlock
+    let tree
+    let failedStateSyncs = []
+
+    beforeEach(async function () {
+      testStateReceiver = await TestStateReceiver.new(accounts[0])
+      await testStateReceiver.setSystemAddress(accounts[0])
+      testRevertingReceiver = await TestRevertingReceiver.new()
+
+      await testRevertingReceiver.toggle()
+      assert.isFalse(await testRevertingReceiver.shouldIRevert())
+
+      // setup some failed state syncs before setting the root
+      tree = new SparseMerkleTree(
+        (await testStateReceiver.TREE_DEPTH()).toNumber()
+      )
+      failedStateSyncs = []
+
+      fromBlock = await web3.eth.getBlockNumber()
+
+      let stateId = (await testStateReceiver.lastStateId()).toNumber() + 1
+      for (let i = 0; i < FUZZ_WEIGHT; i++) {
+        const stateData = randomBytes()
+        const recordBytes = ethUtils.bufferToHex(
+          ethUtils.rlp.encode([
+            stateId,
+            testRevertingReceiver.address,
+            stateData
+          ])
+        )
+
+        assert.isFalse(await testRevertingReceiver.shouldIRevert())
+        // every third state sync succeeds for variance
+        if (i % 3 === 0) {
+          const res = await testStateReceiver.commitState(0, recordBytes)
+          assert.strictEqual(res.logs[0].args.success, true)
+        } else {
+          await testRevertingReceiver.toggle()
+          const res = await testStateReceiver.commitState(0, recordBytes)
+          await testRevertingReceiver.toggle()
+          assert.strictEqual(res.logs[0].args.success, false)
+          tree.add(getLeaf(stateId, testRevertingReceiver.address, stateData))
+          failedStateSyncs.push([
+            stateId,
+            testRevertingReceiver.address,
+            stateData
+          ])
+        }
+        stateId++
+      }
+
+      // set the rootAndClaimCount
+      await testStateReceiver.setRootAndLeafCount(
+        tree.getRoot(),
+        tree.leafCount
+      )
+      assert.equal(failedStateSyncs.length, tree.leafCount)
+
+      toBlock = await web3.eth.getBlockNumber()
+    })
+    it('only rootSetter can set root & leaf count, only once', async () => {
+      assert.equal(await testStateReceiver.rootSetter(), accounts[0])
+      await expectRevert(
+        testStateReceiver.setRootAndLeafCount(tree.getRoot(), tree.leafCount, {
+          from: accounts[1]
+        }),
+        '!rootSetter'
+      )
+      await expectRevert(
+        testStateReceiver.setRootAndLeafCount(tree.getRoot(), tree.leafCount),
+        '!zero'
+      )
+    })
+    it('should not replay zero hashes or invalid proof', async () => {
+      await expectRevert(
+        testStateReceiver.replayHistoricFailedStateSync(
+          randomProof(tree.height),
+          tree.leafCount + 1,
+          // zero leaf
+          0,
+          zeroAddress,
+          '0x'
+        ),
+        'used'
+      )
+      await expectRevert(
+        testStateReceiver.replayHistoricFailedStateSync(
+          randomProof(tree.height),
+          randomInRange(tree.leafCount),
+          randomHex(32),
+          randomAddress(),
+          randomHex(80)
+        ),
+        '!proof'
+      )
+
+      const leadIdx = randomInRange(tree.leafCount)
+      const [stateId, receiver, stateData] = failedStateSyncs[leadIdx]
+      const leaf = getLeaf(stateId, receiver, stateData)
+
+      await expectRevert(
+        testStateReceiver.replayHistoricFailedStateSync(
+          tree.getProofTreeByValue(leaf),
+          (leadIdx + 1) % (1 << tree.height), // random leaf index
+          stateId,
+          receiver,
+          stateData
+        ),
+        '!proof'
+      )
+      await expectRevert(
+        testStateReceiver.replayHistoricFailedStateSync(
+          tree.getProofTreeByValue(leaf),
+          leadIdx,
+          randomHex(32),
+          receiver,
+          stateData
+        ),
+        '!proof'
+      )
+      await expectRevert(
+        testStateReceiver.replayHistoricFailedStateSync(
+          tree.getProofTreeByValue(leaf),
+          leadIdx,
+          stateId,
+          randomHex(20),
+          stateData
+        ),
+        '!proof'
+      )
+      await expectRevert(
+        testStateReceiver.replayHistoricFailedStateSync(
+          tree.getProofTreeByValue(leaf),
+          leadIdx,
+          stateId,
+          receiver,
+          randomHex(80) // different from 68 const used
+        ),
+        '!proof'
+      )
+    })
+    it('should replay all failed state syncs', async () => {
+      const shuffledFailedStateSyncs = failedStateSyncs
+        .map((x, i) => [i, x]) // preserve index
+        .sort(() => Math.random() - 0.5) // shuffle
+      let replayed = 0
+
+      for (const [
+        leafIndex,
+        [stateId, receiver, stateData]
+      ] of shuffledFailedStateSyncs) {
+        const leaf = getLeaf(stateId, receiver, stateData)
+        const proof = tree.getProofTreeByValue(leaf)
+        const res = await testStateReceiver.replayHistoricFailedStateSync(
+          proof,
+          leafIndex,
+          stateId,
+          receiver,
+          stateData
+        )
+        assert.strictEqual(res.logs[0].event, 'StateSyncReplay')
+        assert.strictEqual(res.logs[0].args.stateId.toNumber(), stateId)
+
+        assert.strictEqual(
+          (await testStateReceiver.replayCount()).toNumber(),
+          ++replayed
+        )
+
+        const mask = 1n << BigInt(leafIndex)
+        assert.strictEqual(
+          BigInt((await testStateReceiver.nullifier()).toString()) & mask,
+          mask
+        )
+
+        await expectRevert(
+          testStateReceiver.replayHistoricFailedStateSync(
+            proof,
+            leafIndex,
+            stateId,
+            receiver,
+            stateData
+          ),
+          replayed == failedStateSyncs.length ? 'end' : 'used'
+        )
+      }
+
+      // should not allow replaying again
+      await expectRevert(
+        testStateReceiver.replayHistoricFailedStateSync(
+          randomProof(tree.height),
+          randomInRange(tree.leafCount),
+          randomHex(32),
+          randomHex(20),
+          randomHex(68)
+        ),
+        'end'
+      )
+    })
+    it('should not replay nullified state sync', async () => {
+      const idx = randomInRange(tree.leafCount)
+      const [stateId, receiver, stateData] = failedStateSyncs[idx]
+      const leaf = getLeaf(stateId, receiver, stateData)
+      const proof = tree.getProofTreeByValue(leaf)
+      const res = await testStateReceiver.replayHistoricFailedStateSync(
+        proof,
+        idx,
+        stateId,
+        receiver,
+        stateData
+      )
+      assert.strictEqual(res.logs[0].event, 'StateSyncReplay')
+      assert.strictEqual(res.logs[0].args.stateId.toNumber(), stateId)
+
+      const mask = 1n << BigInt(idx)
+      assert.strictEqual(
+        BigInt((await testStateReceiver.nullifier()).toString()) & mask,
+        mask
+      )
+
+      await expectRevert(
+        testStateReceiver.replayHistoricFailedStateSync(
+          proof,
+          idx,
+          stateId,
+          receiver,
+          stateData
+        ),
+        'used'
+      )
+    })
+    it('should be able to fecth failed state syncs from logs', async () => {
+      const logs = await fetchFailedStateSyncs(
+        web3.currentProvider,
+        fromBlock,
+        testStateReceiver.address,
+        toBlock - fromBlock
+      )
+      assert.strictEqual(logs.length, failedStateSyncs.length)
+      for (let i = 0; i < logs.length; i++) {
+        const log = logs[i]
+        const [stateId] = failedStateSyncs[i]
+        assert.strictEqual(
+          log.topics[0],
+          keccak256('StateCommitted(uint256,bool)')
+        )
+        assert.strictEqual(BigInt(log.topics[1]).toString(), stateId.toString())
+        assert.strictEqual(log.data, '0x' + '0'.repeat(64))
       }
     })
   })

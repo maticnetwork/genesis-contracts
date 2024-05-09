@@ -28,6 +28,8 @@ start_testrpc
 
 npm run truffle:migrate "$@"
 
+export CI=true
+
 if [ "$SOLIDITY_COVERAGE" = true ]; then
   npm run truffle:coverage "$@"
 else

@@ -11,11 +11,14 @@ contract StateReceiver is System {
   uint256 public lastStateId;
 
   bytes32 public failedStateSyncsRoot;
-  mapping(bytes32 => bool) public nullifier;
+  // since we'll have less than 256 claims, we can bitmap them in one slot
+  uint256 public nullifier;
 
   mapping(uint256 => bytes) public failedStateSyncs;
 
   address public rootSetter;
+  uint256 public leafCount;
+  uint256 public replayCount;
   uint256 public constant TREE_DEPTH = 6;
 
   event StateCommitted(uint256 indexed stateId, bool success);
@@ -57,28 +60,32 @@ contract StateReceiver is System {
     IStateReceiver(receiver).onStateReceive(stateId, stateData); // revertable
   }
 
-  function setRoot(bytes32 _root) external {
+  function setRootAndLeafCount(bytes32 _root, uint256 _leafCount) external {
     require(msg.sender == rootSetter, "!rootSetter");
-    require(failedStateSyncsRoot == bytes32(0), "already set");
+    require(failedStateSyncsRoot == bytes32(0), "!zero");
     failedStateSyncsRoot = _root;
+    leafCount = _leafCount;
+    assert(leafCount < 256); // if somebody spams right before the hf, we cant use the bitmap approach, revert to naive approach
   }
 
   function replayHistoricFailedStateSync(
     bytes32[TREE_DEPTH] calldata proof,
-    uint256 proofIndex,
+    uint256 leafIndex,
     uint256 stateId,
     address receiver,
     bytes calldata data
   ) external {
+    require(++replayCount <= leafCount, "end");
     bytes32 root = failedStateSyncsRoot;
     require(root != bytes32(0), "!root");
 
     bytes32 leafHash = keccak256(abi.encode(stateId, receiver, data));
-    bytes32 zeroHash = keccak256(abi.encode(uint256(0), address(0), new bytes(0)));
-    require(leafHash != zeroHash && !nullifier[leafHash], "used");
-    nullifier[leafHash] = true;
+    bytes32 zeroHash = 0x28cf91ac064e179f8a42e4b7a20ba080187781da55fd4f3f18870b7a25bacb55; // keccak256(abi.encode(uint256(0), address(0), new bytes(0)));
+    uint256 mask = 1 << leafIndex;
+    require(leafHash != zeroHash && nullifier & mask != mask, "used");
+    nullifier = nullifier | (1 << leafIndex);
 
-    require(root == _getRoot(proof, proofIndex, leafHash), "!proof");
+    require(root == _getRoot(proof, leafIndex, leafHash), "!proof");
 
     emit StateSyncReplay(stateId);
     IStateReceiver(receiver).onStateReceive(stateId, data);
