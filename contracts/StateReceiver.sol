@@ -18,7 +18,7 @@ contract StateReceiver is System {
   address public rootSetter;
   uint256 public leafCount;
   uint256 public replayCount;
-  uint256 public constant TREE_DEPTH = 7;
+  uint256 public constant TREE_DEPTH = 16;
 
   event StateCommitted(uint256 indexed stateId, bool success);
   event StateSyncReplay(uint256 indexed stateId);
