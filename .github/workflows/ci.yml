@@ -5,6 +5,7 @@ on:
     branches:
       - develop
       - master
+      - tmp/ci-fuzz
   pull_request:
     branches: 
       - develop

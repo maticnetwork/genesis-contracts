@@ -19,7 +19,7 @@ const randomBytes = () => randomHex(randomInRange(68))
 const randomProof = (height) =>
   new Array(height).fill(0).map(() => randomHex(32))
 
-const FUZZ_WEIGHT = process.env.CI == 'true' ? 128 : 20
+const FUZZ_WEIGHT = process.env.CI == 'true' ? 2 ** 16 : 256
 
 contract('StateReceiver', async (accounts) => {
   describe('commitState()', async () => {
@@ -412,7 +412,7 @@ contract('StateReceiver', async (accounts) => {
         '!proof'
       )
     })
-    it('should replay all failed state syncs', async () => {
+    it.only('should replay all failed state syncs', async () => {
       const shuffledFailedStateSyncs = failedStateSyncs
         .map((x, i) => [i, x]) // preserve index
         .sort(() => Math.random() - 0.5) // shuffle
@@ -463,7 +463,7 @@ contract('StateReceiver', async (accounts) => {
         ),
         'end'
       )
-    })
+    }).timeout(999999999)
     it('should not replay nullified state sync', async () => {
       const idx = randomInRange(tree.leafCount)
       const [stateId, receiver, stateData] = failedStateSyncs[idx]
