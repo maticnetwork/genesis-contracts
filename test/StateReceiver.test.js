@@ -19,7 +19,7 @@ const randomBytes = () => randomHex(randomInRange(68))
 const randomProof = (height) =>
   new Array(height).fill(0).map(() => randomHex(32))
 
-const FUZZ_WEIGHT = process.env.CI == 'true' ? 256 : 50
+const FUZZ_WEIGHT = process.env.CI == 'true' ? 256 : 256
 
 contract('StateReceiver', async (accounts) => {
   describe('commitState()', async () => {
@@ -276,6 +276,7 @@ contract('StateReceiver', async (accounts) => {
     let failedStateSyncs = []
 
     beforeEach(async function () {
+      this.timeout(0)
       testStateReceiver = await TestStateReceiver.new(accounts[0])
       await testStateReceiver.setSystemAddress(accounts[0])
       testRevertingReceiver = await TestRevertingReceiver.new()
@@ -330,7 +331,7 @@ contract('StateReceiver', async (accounts) => {
       assert.equal(failedStateSyncs.length, tree.leafCount)
 
       toBlock = await web3.eth.getBlockNumber()
-    }).timeout(100000000)
+    })
     it('only rootSetter can set root & leaf count, only once', async () => {
       assert.equal(await testStateReceiver.rootSetter(), accounts[0])
       await expectRevert(
