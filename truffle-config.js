@@ -79,7 +79,8 @@ module.exports = {
 		reporter: "eth-gas-reporter",
 		reporterOptions: {
 			src: "./contracts",
-			url: "http://localhost:8545",
+      url: "http://localhost:8545",
+      timeout: 0
 		},
 	},
 
