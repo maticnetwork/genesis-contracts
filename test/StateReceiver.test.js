@@ -19,7 +19,7 @@ const randomBytes = () => randomHex(randomInRange(68))
 const randomProof = (height) =>
   new Array(height).fill(0).map(() => randomHex(32))
 
-const FUZZ_WEIGHT = process.env.CI == 'true' ? 2 ** 8 : 256
+const FUZZ_WEIGHT = process.env.CI == 'true' ? 2 ** 16 : 256
 
 contract('StateReceiver', async (accounts) => {
   describe('commitState()', async () => {
