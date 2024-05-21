@@ -73,6 +73,7 @@ contract StateReceiver is System {
     address receiver,
     bytes calldata data
   ) external {
+    require(leafIndex < 2 ** TREE_DEPTH, "invalid leafIndex");
     require(++replayCount <= leafCount, "end");
     bytes32 root = failedStateSyncsRoot;
     require(root != bytes32(0), "!root");

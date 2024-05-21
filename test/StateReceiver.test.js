@@ -15,6 +15,7 @@ const zeroHash = '0x' + '0'.repeat(64)
 const zeroLeaf = getLeaf(0, zeroAddress, '0x')
 const randomAddress = () => ethUtils.toChecksumAddress(randomHex(20))
 const randomInRange = (x, y = 0) => Math.floor(Math.random() * (x - y) + y)
+const randomGreaterThan = (x = 0) => Math.floor(Math.random() * x + x)
 const randomBytes = () => randomHex(randomInRange(68))
 const randomProof = (height) =>
   new Array(height).fill(0).map(() => randomHex(32))
@@ -513,6 +514,19 @@ contract('StateReceiver', async (accounts) => {
         assert.strictEqual(BigInt(log.topics[1]).toString(), stateId.toString())
         assert.strictEqual(log.data, '0x' + '0'.repeat(64))
       }
+    })
+    it('should revert if value of leaf index is out of bounds', async () => {
+      const invalidLeafIndex = randomGreaterThan(2 ** (await testStateReceiver.TREE_DEPTH()).toNumber());
+      await expectRevert(
+        testStateReceiver.replayHistoricFailedStateSync(
+          randomProof(tree.height),
+          invalidLeafIndex,
+          randomHex(32),
+          randomAddress(),
+          randomHex(68)
+        ),
+        'invalid leafIndex'
+      )
     })
   })
 })
