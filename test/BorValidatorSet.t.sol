@@ -321,6 +321,25 @@ contract BorValidatorSetTest is Test {
         assertEq(borValidatorSet.getStakePowerBySigs(1, digest, sigs), sum);
     }
 
+    function test_checkMembership_SingleLeaf() public {
+        bytes32 leaf = keccak256("leaf");
+        assertTrue(borValidatorSet.checkMembership(leaf, leaf, ""));
+        assertFalse(borValidatorSet.checkMembership(keccak256("not root"), leaf, ""));
+    }
+
+    function test_checkMembership() public {
+        bytes32 leaf = keccak256("leaf");
+        bytes32 proof1 = keccak256("proof1");
+        bytes32 proof2 = keccak256("proof2");
+        bytes32 computedHash = sha256(abi.encodePacked(hex"00", leaf));
+        bytes memory proof = abi.encodePacked(hex"01", proof1, hex"00", proof2, "garbage");
+        bytes32 root = sha256(abi.encodePacked(hex"01", computedHash, proof1));
+        root = sha256(abi.encodePacked(hex"01", proof2, root));
+        assertTrue(borValidatorSet.checkMembership(root, leaf, proof));
+        bytes memory wrongProof = abi.encodePacked(hex"01", proof1, hex"01", proof2, "garbage");
+        assertFalse(borValidatorSet.checkMembership(root, leaf, wrongProof));
+    }
+
     function test_leafNode(bytes32 d) public returns (bytes32) {
         assertEq(borValidatorSet.leafNode(d), sha256(abi.encodePacked(bytes1(uint8(0)), d)));
     }
