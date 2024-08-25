@@ -22,7 +22,7 @@
     "bluebird": "^3.5.5",
     "chai": "4.2.0",
     "chai-as-promised": "^7.1.1",
-    "commander": "^3.0.1",
+    "commander": "^12.1.0",
     "eth-gas-reporter": "^0.2.25",
     "ganache": "^7.5.0",
     "ganache-cli": "^6.12.2",
