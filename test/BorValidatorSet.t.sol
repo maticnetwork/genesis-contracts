@@ -7,7 +7,7 @@ import "./helpers/IBorValidatorSet.sol";
 contract BorValidatorSetTest is Test {
     uint8 constant LIST_SHORT_START = 0xc0;
     address public constant SYSTEM_ADDRESS = 0xffffFFFfFFffffffffffffffFfFFFfffFFFfFFfE;
-    bytes32 public constant CHAIN = keccak256("heimdall-P5rXwg");
+    bytes32 public constant CHAIN = keccak256("heimdall-15001");
     bytes32 public constant ROUND_TYPE = keccak256("vote");
     bytes32 public constant BOR_ID = keccak256("15001");
     uint8 public constant VOTE_TYPE = 2;
