@@ -90,7 +90,7 @@ contract StateReceiverTest is Test {
     assertEq(stateReceiver.lastStateId(), 1);
   }
 
-  function test_revertReplayFailedStateSync(uint256 stateId, bytes memory callData) public {
+  function testRevert_ReplayFailedStateSync(uint256 stateId, bytes memory callData) public {
     vm.assume(stateId > 0);
     vm.store(address(stateReceiver), bytes32(0), bytes32(stateId - 1));
     assertTrue(revertingReceiver.shouldIRevert());
@@ -182,7 +182,7 @@ contract StateReceiverTest is Test {
       proof,
       vm.randomUint(0, 2 ** 16),
       vm.randomUint(),
-      address(uint160(vm.randomUint())),
+      vm.randomAddress(),
       stateData
     );
   }
@@ -211,7 +211,8 @@ contract StateReceiverTest is Test {
 
     revertingReceiver.toggle();
 
-    for (uint256 i = 0; i < stateDatas.length; ++i) {
+    for (uint256 i = 0; i < leafCount; ++i) {
+      vm.expectCall(receiver, 0, abi.encodeWithSignature("onStateReceive(uint256,bytes)", i + 1, stateDatas[i]));
       vm.expectEmit();
       emit StateSyncReplay(i + 1);
       stateReceiver.replayHistoricFailedStateSync(
