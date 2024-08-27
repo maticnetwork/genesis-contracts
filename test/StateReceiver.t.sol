@@ -3,6 +3,8 @@ pragma solidity 0.8.26;
 import "../lib/forge-std/src/Test.sol";
 
 import "./helpers/IStateReceiver.sol";
+import {TestReenterer} from "test/helpers/TestReenterer.sol";
+import {TestRevertingReceiver} from "test/helpers/TestRevertingReceiver.sol";
 
 contract StateReceiverTest is Test {
   address public constant SYSTEM_ADDRESS = 0xffffFFFfFFffffffffffffffFfFFFfffFFFfFFfE;
@@ -11,12 +13,16 @@ contract StateReceiverTest is Test {
   IStateReceiver internal stateReceiver = IStateReceiver(0x0000000000000000000000000000000000001001);
   address internal rootSetter = makeAddr("rootSetter");
 
+  TestReenterer internal reenterer = new TestReenterer();
+  TestRevertingReceiver internal revertingReceiver = new TestRevertingReceiver();
+
   function setUp() public {
     address tmp = deployCode("out/StateReceiver.sol/StateReceiver.json", abi.encode(rootSetter));
     vm.etch(address(stateReceiver), tmp.code);
+    vm.label(address(stateReceiver), "stateReceiver");
   }
 
-  function test_deployment() public {
+  function test_deployment() public view {
     assertEq(stateReceiver.rootSetter(), rootSetter);
   }
 
@@ -61,6 +67,7 @@ contract StateReceiverTest is Test {
     emit StateCommitted(stateId, false);
     assertFalse(stateReceiver.commitState(0, recordBytes));
     assertEq(stateReceiver.lastStateId(), 1);
+    assertEq(stateReceiver.failedStateSyncs(stateId), abi.encode(receiver, stateData));
   }
 
   function test_commitState_Success() public {
@@ -81,6 +88,69 @@ contract StateReceiverTest is Test {
     emit StateCommitted(stateId, true);
     assertTrue(stateReceiver.commitState(0, recordBytes));
     assertEq(stateReceiver.lastStateId(), 1);
+  }
+
+  function test_revertReplayFailedStateSync(uint256 stateId, bytes memory callData) public {
+    vm.assume(stateId > 0);
+    vm.store(address(stateReceiver), bytes32(0), bytes32(stateId - 1));
+    assertTrue(revertingReceiver.shouldIRevert());
+    bytes memory recordBytes = _encodeRecord(stateId, address(revertingReceiver), callData);
+
+    vm.prank(SYSTEM_ADDRESS);
+    vm.expectEmit();
+    emit StateCommitted(stateId, false);
+    assertFalse(stateReceiver.commitState(0, recordBytes));
+    assertEq(stateReceiver.failedStateSyncs(stateId), abi.encode(address(revertingReceiver), callData));
+
+    assertTrue(revertingReceiver.shouldIRevert());
+
+    vm.expectRevert("TestRevertingReceiver");
+    stateReceiver.replayFailedStateSync(stateId);
+  }
+
+  function test_ReplayFailedStateSync(uint256 stateId, bytes memory callData) public {
+    vm.assume(stateId > 0);
+    vm.store(address(stateReceiver), bytes32(0), bytes32(stateId - 1));
+    assertTrue(revertingReceiver.shouldIRevert());
+    bytes memory recordBytes = _encodeRecord(stateId, address(revertingReceiver), callData);
+
+    vm.prank(SYSTEM_ADDRESS);
+    vm.expectEmit();
+    emit StateCommitted(stateId, false);
+    assertFalse(stateReceiver.commitState(0, recordBytes));
+    assertEq(stateReceiver.failedStateSyncs(stateId), abi.encode(address(revertingReceiver), callData));
+
+    revertingReceiver.toggle();
+    assertFalse(revertingReceiver.shouldIRevert());
+
+    vm.expectCall(
+      address(revertingReceiver),
+      0,
+      abi.encodeWithSignature("onStateReceive(uint256,bytes)", stateId, callData)
+    );
+    stateReceiver.replayFailedStateSync(stateId);
+
+    vm.expectRevert("!found");
+    stateReceiver.replayFailedStateSync(stateId);
+  }
+
+  function test_ReplayFailFromReenterer(uint256 stateId, bytes memory callData) public {
+    vm.assume(stateId > 0);
+    vm.store(address(stateReceiver), bytes32(0), bytes32(stateId - 1));
+    bytes memory recordBytes = _encodeRecord(stateId, address(reenterer), callData);
+
+    vm.prank(SYSTEM_ADDRESS);
+    vm.expectEmit();
+    emit StateCommitted(stateId, false);
+    assertFalse(stateReceiver.commitState(0, recordBytes));
+    assertEq(stateReceiver.failedStateSyncs(stateId), abi.encode(address(reenterer), callData));
+
+    revertingReceiver.toggle();
+    assertFalse(revertingReceiver.shouldIRevert());
+
+    vm.expectCall(address(reenterer), 0, abi.encodeWithSignature("onStateReceive(uint256,bytes)", stateId, callData));
+    vm.expectRevert("!found");
+    stateReceiver.replayFailedStateSync(stateId);
   }
 
   function _encodeRecord(
