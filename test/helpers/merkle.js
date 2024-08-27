@@ -103,4 +103,30 @@ class SparseMerkleTree {
   }
 }
 
-module.exports = { SparseMerkleTree }
+function getLeaf(stateID, receiverAddress, stateData) {
+  return keccak256(
+    abi.encodeParameters(
+      ['uint256', 'address', 'bytes'],
+      [stateID, receiverAddress, stateData]
+    )
+  )
+}
+
+const [receiver, stateDatasEncoded] = process.argv.slice(2)
+
+const stateDatas = abi.decodeParameter('bytes[]', stateDatasEncoded)
+
+const tree = new SparseMerkleTree(16)
+
+for (let i = 0; i < stateDatas.length; i++) {
+  tree.add(getLeaf(i + 1, receiver, stateDatas[i]))
+}
+const root = tree.getRoot()
+const proofs = stateDatas.map((_, i) => tree.getProofTreeByIndex(i))
+
+console.log(
+  abi.encodeParameters(
+    ['bytes32', 'bytes[]'],
+    [root, proofs.map((proof) => abi.encodeParameter('bytes32[16]', proof))]
+  )
+)

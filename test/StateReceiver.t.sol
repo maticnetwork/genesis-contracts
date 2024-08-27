@@ -123,6 +123,8 @@ contract StateReceiverTest is Test {
     revertingReceiver.toggle();
     assertFalse(revertingReceiver.shouldIRevert());
 
+    vm.expectEmit();
+    emit StateSyncReplay(stateId);
     vm.expectCall(
       address(revertingReceiver),
       0,
@@ -151,6 +153,88 @@ contract StateReceiverTest is Test {
     vm.expectCall(address(reenterer), 0, abi.encodeWithSignature("onStateReceive(uint256,bytes)", stateId, callData));
     vm.expectRevert("!found");
     stateReceiver.replayFailedStateSync(stateId);
+  }
+
+  function test_rootSetter(address random) public {
+    vm.prank(random);
+    if (random != rootSetter) vm.expectRevert("!rootSetter");
+    stateReceiver.setRootAndLeafCount(bytes32(uint(0x1337)), 0);
+
+    vm.prank(rootSetter);
+    if (random == rootSetter) vm.expectRevert("!zero");
+    stateReceiver.setRootAndLeafCount(bytes32(uint(0x1337)), 0);
+  }
+
+  function test_shouldNotReplayZeroLeaf(bytes32 root, bytes32[16] memory proof) public {
+    vm.prank(rootSetter);
+    stateReceiver.setRootAndLeafCount(root, 1);
+
+    vm.expectRevert(bytes("used"));
+    stateReceiver.replayHistoricFailedStateSync(proof, 0, 0, address(0), new bytes(0));
+  }
+
+  function test_shouldNotReplayInvalidProof(bytes32 root, bytes32[16] memory proof, bytes memory stateData) public {
+    vm.prank(rootSetter);
+    stateReceiver.setRootAndLeafCount(root, 1);
+
+    vm.expectRevert("!proof");
+    stateReceiver.replayHistoricFailedStateSync(
+      proof,
+      vm.randomUint(0, 2 ** 16),
+      vm.randomUint(),
+      address(uint160(vm.randomUint())),
+      stateData
+    );
+  }
+
+  function test_FailedStateSyncs(bytes[] memory stateDatas) external {
+    vm.assume(stateDatas.length > 1 && stateDatas.length < 10);
+
+    address receiver = address(revertingReceiver);
+
+    for (uint256 i = 0; i < stateDatas.length; ++i) {
+      bytes memory recordBytes = _encodeRecord(i + 1, receiver, stateDatas[i]);
+
+      vm.prank(SYSTEM_ADDRESS);
+      vm.expectEmit();
+      emit StateCommitted(i + 1, false);
+      assertFalse(stateReceiver.commitState(0, recordBytes));
+    }
+
+    uint256 leafCount = stateDatas.length;
+    bytes32 root;
+    bytes[] memory proofs = new bytes[](leafCount);
+    (root, proofs) = _getRootAndProofs(receiver, abi.encode(stateDatas));
+
+    vm.prank(rootSetter);
+    stateReceiver.setRootAndLeafCount(root, leafCount);
+
+    revertingReceiver.toggle();
+
+    for (uint256 i = 0; i < stateDatas.length; ++i) {
+      vm.expectEmit();
+      emit StateSyncReplay(i + 1);
+      stateReceiver.replayHistoricFailedStateSync(
+        abi.decode(proofs[i], (bytes32[16])),
+        i,
+        i + 1,
+        receiver,
+        stateDatas[i]
+      );
+    }
+  }
+
+  function _getRootAndProofs(
+    address receiver,
+    bytes memory stateDatasEncoded
+  ) internal returns (bytes32 root, bytes[] memory proofs) {
+    string[] memory inputs = new string[](4);
+    inputs[0] = "node";
+    inputs[1] = "test/helpers/merkle.js";
+    inputs[2] = vm.toString(receiver);
+    inputs[3] = vm.toString(stateDatasEncoded);
+
+    (root, proofs) = abi.decode(vm.ffi(inputs), (bytes32, bytes[]));
   }
 
   function _encodeRecord(
