@@ -36,4 +36,4 @@ jobs:
       - name: Generate genesis file
         run: bash generate.sh 15001 heimdall-15001
       - name: Run tests
-        run: forge test -vvv
+        run: forge built && forge test -vvv
