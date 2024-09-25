@@ -78,7 +78,7 @@ Promise.all([
   ),
   compileContract(
     "maticChildERC20Contract",
-    "matic-contracts/contracts/child/MRC20.sol",
+    "pos-contracts/contracts/child/MRC20.sol",
     "MRC20"
   )
 ]).then(result => {

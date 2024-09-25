@@ -12,10 +12,10 @@ $ git submodule update
 
 ### 2. Compile Matic contracts
 ```bash
-$ cd matic-contracts
+$ cd pos-contracts
 $ npm install
-$ node scripts/process-templates.js --bor-chain-id <bor-chain-id>
-$ npm run truffle:compile
+$ npm run template:process -- --bor-chain-id 15001
+$ npx hardhat compile
 $ cd ..
 ```
 
