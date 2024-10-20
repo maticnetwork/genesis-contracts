@@ -27,7 +27,7 @@
     "ganache": "^7.5.0",
     "ganache-cli": "^6.12.2",
     "nunjucks": "^3.2.0",
-    "openzeppelin-solidity": "2.2.0",
+    "openzeppelin-solidity": "4.8.1",
     "solidity-rlp": "^2.0.0",
     "truffle": "^5.10.1",
     "web3": "4.11.0"
