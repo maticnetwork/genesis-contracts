@@ -12,7 +12,6 @@ fs_permissions = [{ access = "read", path = "./out/"}]
 remappings = [
   "forge-std=lib/forge-std/src",
   "openzeppelin-solidity/=node_modules/openzeppelin-solidity/",
-  "solidity-rlp/=node_modules/solidity-rlp/"
 ]
 
 [profile.intense.fuzz]
