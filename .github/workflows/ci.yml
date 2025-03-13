@@ -22,12 +22,17 @@ jobs:
         with:
           node-version: '16'
           registry-url: 'https://registry.npmjs.org'
-      - uses: dtolnay/rust-toolchain@nightly
-      - name: Install svm
+      - name: Install solc-select
         run: |
-          cargo install svm-rs
-          svm install 0.5.17
-          svm install 0.6.12
+          sudo apt update
+          sudo apt install python3 python3-pip -y
+          pip install solc-select
+      - name: Install Solidity Version
+        run: |
+          solc-select install 0.5.17
+          solc-select install 0.6.12
+          solc-select use 0.5.17
+          solc --version
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
