@@ -13,6 +13,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    matrix:
+      solc_version: [ "0.5.17", "0.6.12" ]
     steps:
       - uses: actions/checkout@v3
       - name: Update Path
@@ -22,12 +24,16 @@ jobs:
         with:
           node-version: '16'
           registry-url: 'https://registry.npmjs.org'
-      - uses: dtolnay/rust-toolchain@nightly
-      - name: Install svm
+      - name: Install solc-select
         run: |
-          cargo install svm-rs
-          svm install 0.5.17
-          svm install 0.6.12
+          sudo apt update
+          sudo apt install python3 python3-pip -y
+          pip install solc-select
+      - name: Install Solidity Version
+        run: |
+          solc-select install ${{ matrix.solc_version }}
+          solc-select use ${{ matrix.solc_version }}
+          solc --version
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
